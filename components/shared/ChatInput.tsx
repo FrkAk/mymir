@@ -73,7 +73,7 @@ export function ChatInput({
         placeholder={placeholder}
         disabled={isLoading || disabled}
         rows={1}
-        className="flex-1 resize-none rounded-[--radius-md] border border-border-strong bg-base px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent disabled:opacity-50"
+        className="flex-1 resize-none rounded-lg border border-border-strong bg-base px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent disabled:opacity-50"
       />
       <button
         onClick={send}

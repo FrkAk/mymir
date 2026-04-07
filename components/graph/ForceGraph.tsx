@@ -934,7 +934,7 @@ function GraphLegend({ hiddenStatuses, onToggleStatus }: {
 }) {
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <div className="absolute bottom-4 left-3 z-10 rounded-[--radius-md] bg-surface px-2.5 py-2 shadow-[var(--shadow-card)]">
+    <div className="absolute bottom-4 left-3 z-10 rounded-lg border border-border bg-surface px-2.5 py-2 shadow-[var(--shadow-float)]">
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}

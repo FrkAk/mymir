@@ -540,7 +540,7 @@ export function TaskTab({
                     <span
                       key={file}
                       title={file}
-                      className="inline-flex items-center gap-1.5 rounded-[--radius-sm] bg-surface-raised px-2 py-1 shadow-[var(--shadow-card)]"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-raised/50 px-2 py-1"
                     >
                       <svg viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3 shrink-0 text-text-muted">
                         <path d="M3.75 0A1.75 1.75 0 002 1.75v12.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 14.25V4.664a1.75 1.75 0 00-.513-1.237L10.573.513A1.75 1.75 0 009.336 0H3.75zm5.75 3.5v-2h.336a.25.25 0 01.177.073l2.914 2.914a.25.25 0 01.073.177V3.5H9.5zM3.75 1.5h4.75v2.25c0 .414.336.75.75.75h2.25v9.75a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25V1.75a.25.25 0 01.25-.25z" />
@@ -571,7 +571,7 @@ export function TaskTab({
       <div className="flex shrink-0 items-center border-t border-border">
         <button
           onClick={toggleSpec}
-          className="flex cursor-pointer items-center gap-2 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-opacity hover:opacity-60"
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
         >
           <svg
             viewBox="0 0 16 16"
@@ -585,7 +585,7 @@ export function TaskTab({
         <span className="h-3 w-px bg-border-strong" />
         <button
           onClick={toggleChat}
-          className="flex cursor-pointer items-center gap-2 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-opacity hover:opacity-60"
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
         >
           <svg
             viewBox="0 0 16 16"
@@ -837,7 +837,7 @@ function RelationshipsSection({
             const other = taskMap.get(otherId);
             const { label, color } = edgeLabel(e, taskId);
             return (
-              <div key={e.id} className="group/edge -mx-1 rounded-[--radius-sm] px-3 py-1.5 transition-colors duration-100 hover:bg-surface-raised">
+              <div key={e.id} className="group/edge -mx-1 rounded-md px-3 py-1.5 transition-colors duration-100 hover:bg-surface-raised">
                 <div className="flex items-center gap-2">
                   <span className={`shrink-0 font-mono text-[10px] font-semibold uppercase tracking-wider ${color}`}>
                     {label}
@@ -873,7 +873,7 @@ function RelationshipsSection({
 
       {/* Add relationship form */}
       {adding ? (
-        <div className="mt-2 overflow-hidden rounded-[--radius-md] bg-surface-raised/40 shadow-[var(--shadow-card)]">
+        <div className="mt-2 overflow-hidden rounded-lg border border-border bg-surface-raised/40">
           {/* Relation mode toggle — segmented control */}
           <div className="flex border-b border-border">
             {RELATION_MODES.map(({ mode, label, accent }) => {
@@ -912,7 +912,7 @@ function RelationshipsSection({
               />
               {/* Dropdown */}
               {!selectedTarget && search && candidates.length > 0 && (
-                <div className="absolute inset-x-0 top-full z-10 mt-1 max-h-[140px] overflow-y-auto rounded-[--radius-md] bg-surface shadow-[var(--shadow-card)]">
+                <div className="absolute inset-x-0 top-full z-10 mt-1 max-h-[140px] overflow-y-auto rounded-lg border border-border bg-surface shadow-[var(--shadow-float)]">
                   {candidates.slice(0, 8).map(([id, t]) => (
                     <button
                       key={id}
@@ -926,7 +926,7 @@ function RelationshipsSection({
                 </div>
               )}
               {!selectedTarget && search && candidates.length === 0 && (
-                <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-[--radius-md] bg-surface px-2.5 py-2 text-[11px] text-text-muted shadow-[var(--shadow-card)]">
+                <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-[11px] text-text-muted shadow-[var(--shadow-float)]">
                   No matching tasks
                 </div>
               )}

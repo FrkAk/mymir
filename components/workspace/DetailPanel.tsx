@@ -53,7 +53,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 /** Status colors for the stepper. */
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'text-text-muted',
+  draft: 'text-draft',
   planned: 'text-planned',
   in_progress: 'text-progress',
   done: 'text-done',
@@ -61,7 +61,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 /** Header gradient keyed to task status. */
 const STATUS_HEADER: Record<string, { gradient: string; border: string; badge: string }> = {
-  draft: { gradient: 'from-text-muted/10 via-text-muted/3 to-transparent', border: 'border-text-muted/20', badge: 'bg-text-muted/15 text-text-muted' },
+  draft: { gradient: 'from-draft/10 via-draft/3 to-transparent', border: 'border-draft/20', badge: 'bg-draft/12 text-draft' },
   planned: { gradient: 'from-planned/15 via-planned/4 to-transparent', border: 'border-planned/25', badge: 'bg-planned/15 text-planned' },
   in_progress: { gradient: 'from-progress/15 via-progress/4 to-transparent', border: 'border-progress/25', badge: 'bg-progress/15 text-progress' },
   done: { gradient: 'from-done/20 via-done/5 to-transparent', border: 'border-done/30', badge: 'bg-done/15 text-done' },
@@ -243,9 +243,9 @@ export function DetailPanel({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.1 }}
                     onClick={() => categories.length > 0 && setCategoryOpen(true)}
-                    className={`cursor-pointer inline-flex items-center gap-1.5 rounded-[--radius-sm] px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
+                    className={`cursor-pointer inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
                       task.category
-                        ? 'bg-surface-raised text-text-secondary shadow-[var(--shadow-card)] hover:opacity-60'
+                        ? 'bg-accent/8 text-accent-light hover:bg-accent/12'
                         : categories.length > 0
                           ? 'border border-dashed border-border-strong text-text-muted/30 hover:text-text-muted/50'
                           : 'border border-dashed border-border-strong text-text-muted/30'
@@ -273,10 +273,10 @@ export function DetailPanel({
                         <button
                           key={cat}
                           onClick={() => { handleCategoryChange(isCurrent ? null : cat); setCategoryOpen(false); }}
-                          className={`shrink-0 cursor-pointer rounded-[--radius-sm] px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
+                          className={`shrink-0 cursor-pointer rounded-md px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
                             isCurrent
-                              ? 'bg-surface-raised text-text-secondary shadow-[var(--shadow-card)]'
-                              : 'text-text-muted/40 hover:text-text-muted hover:opacity-80'
+                              ? 'bg-accent/10 text-accent-light'
+                              : 'text-text-muted/40 hover:bg-surface-hover hover:text-text-muted'
                           }`}
                         >
                           {cat}
@@ -291,7 +291,7 @@ export function DetailPanel({
             {/* Tags (right) — editable */}
             <div className="flex flex-wrap items-center justify-end gap-1 ml-auto min-w-0">
               {((task.tags as string[] | null) ?? []).map((tag) => (
-                <span key={tag} className="group/tag inline-flex items-center gap-0.5 rounded-[--radius-sm] bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] font-medium text-text-secondary shadow-[var(--shadow-card)]">
+                <span key={tag} className="group/tag inline-flex items-center gap-0.5 rounded-md bg-accent/8 px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent-light">
                   {tag}
                   <button
                     onClick={() => handleRemoveTag(tag)}
@@ -347,12 +347,12 @@ export function DetailPanel({
                   )}
                   <button
                     onClick={() => handleStatusChange(status)}
-                    className={`relative cursor-pointer rounded-[--radius-sm] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all ${
+                    className={`relative cursor-pointer rounded-md px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all ${
                       isCurrent
-                        ? `${color} bg-surface-raised shadow-[var(--shadow-button)]`
+                        ? `${color} bg-surface-raised ring-1 ring-current/20`
                         : isPast
-                          ? 'text-done/60 hover:opacity-60'
-                          : 'text-text-muted/50 hover:opacity-60 hover:text-text-muted'
+                          ? 'text-done/60 hover:bg-surface-hover'
+                          : 'text-text-muted/50 hover:bg-surface-hover hover:text-text-muted'
                     }`}
                     title={`Set to ${STATUS_LABELS[status]}`}
                   >

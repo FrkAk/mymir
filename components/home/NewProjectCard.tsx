@@ -13,7 +13,7 @@ export function NewProjectCard() {
       <motion.div
         whileHover={{ y: -2, scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className="flex h-full min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-border-strong bg-surface p-5 transition-all hover:border-accent/30 hover:bg-accent-glow"
+        className="flex h-full min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface p-5 transition-all hover:border-accent/30 hover:bg-accent-glow"
       >
         <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent">
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">

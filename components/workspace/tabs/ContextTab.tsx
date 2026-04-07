@@ -43,7 +43,7 @@ export function ContextTab({
         </p>
       </div>
 
-      <pre className="max-h-[50vh] overflow-auto rounded-[--radius-md] bg-surface-raised p-4 font-mono text-xs text-text-secondary leading-relaxed shadow-[var(--shadow-card)]">
+      <pre className="max-h-[50vh] overflow-auto rounded-lg border border-border bg-surface-raised p-4 font-mono text-xs text-text-secondary leading-relaxed">
         {contextText}
       </pre>
 

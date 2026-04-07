@@ -31,7 +31,7 @@ export function ContinueBanner({
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="mb-6 flex items-center justify-between rounded-[--radius-lg] bg-accent-glow p-4 shadow-[0_0_0_1px_rgba(129,140,248,0.2)] transition-shadow hover:shadow-[0_0_0_1px_rgba(129,140,248,0.4)]"
+        className="mb-6 flex items-center justify-between rounded-xl border border-accent/20 bg-accent-glow p-4 shadow-[var(--shadow-card)] transition-all hover:border-accent/40"
       >
         <div>
           <p className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-accent">

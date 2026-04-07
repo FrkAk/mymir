@@ -17,9 +17,9 @@ interface CardProps {
 }
 
 const baseClasses =
-  'bg-surface shadow-[var(--shadow-card)] rounded-[--radius-lg] transition-shadow';
+  'bg-surface border border-border rounded-xl shadow-[var(--shadow-card)] transition-all';
 
-const hoverClasses = 'hover:shadow-[var(--shadow-card-hover)] glow-card';
+const hoverClasses = 'hover:border-border-strong hover:shadow-[var(--shadow-card-hover)] glow-card';
 
 /**
  * Card container with optional glow hover and entrance animation.

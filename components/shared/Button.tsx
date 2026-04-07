@@ -13,11 +13,11 @@ const sizes = {
 /** Button variant style maps. */
 const variants = {
   primary:
-    'bg-transparent text-text-primary font-semibold border border-border-strong shadow-[var(--shadow-button)] rounded-[--radius-pill]',
+    'bg-transparent text-text-primary font-semibold border border-border-strong shadow-[var(--shadow-button)] rounded-full',
   secondary:
-    'bg-transparent text-text-primary border border-border-strong shadow-[var(--shadow-button)] rounded-[--radius-sm]',
+    'bg-transparent text-text-primary border border-border-strong shadow-[var(--shadow-button)] rounded-md',
   ghost: 'bg-transparent text-text-muted hover:text-text-primary',
-  copy: 'font-mono border border-border-strong hover:border-accent text-text-secondary text-xs rounded-[--radius-sm]',
+  copy: 'font-mono border border-border-strong hover:border-accent text-text-secondary text-xs rounded-md',
 } as const;
 
 type ButtonVariant = keyof typeof variants;

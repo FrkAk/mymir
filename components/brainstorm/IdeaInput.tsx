@@ -38,7 +38,7 @@ export function IdeaInput({ onSubmit }: IdeaInputProps) {
         onChange={(e) => setIdea(e.target.value)}
         placeholder="A habit tracker app that helps people build daily routines with streaks and reminders..."
         rows={5}
-        className="mb-6 w-full max-w-lg resize-none rounded-[--radius-md] border border-border-strong bg-base px-5 py-4 text-sm leading-relaxed text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent"
+        className="mb-6 w-full max-w-lg resize-none rounded-lg border border-border-strong bg-base px-5 py-4 text-sm leading-relaxed text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent"
       />
 
       <Button

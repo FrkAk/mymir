@@ -73,7 +73,7 @@ export function ProjectCard({
     <Link href={href} className="block no-underline">
       <motion.div
         whileHover={{ y: -2 }}
-        className="group glow-card relative rounded-[--radius-lg] bg-surface p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+        className="group glow-card relative rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow-card)] transition-all hover:border-border-strong hover:shadow-[var(--shadow-card-hover)]"
       >
         {/* Delete button */}
         <div className="absolute right-3 top-3">
@@ -113,17 +113,17 @@ export function ProjectCard({
         <ProgressBar value={progress} status={progressStatus} className="mb-3" />
 
         <div className="flex items-center justify-between font-mono text-xs text-text-muted">
-          <span className={`inline-flex items-center gap-1.5 rounded-[--radius-sm] px-2 py-0.5 text-[10px] font-semibold ${
+          <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
             status === 'active' ? 'bg-done/10 text-done'
             : status === 'decomposing' ? 'bg-progress/10 text-progress'
             : status === 'brainstorming' ? 'bg-accent/10 text-accent'
-            : 'bg-text-muted/10 text-text-muted'
+            : 'bg-draft/10 text-draft'
           }`}>
             <span className={`h-1.5 w-1.5 rounded-full ${
               status === 'active' ? 'bg-done'
               : status === 'decomposing' ? 'bg-progress'
               : status === 'brainstorming' ? 'bg-accent'
-              : 'bg-text-muted'
+              : 'bg-draft'
             }`} />
             {status === 'brainstorming' ? 'Idea' : status === 'decomposing' ? 'Building' : status === 'active' ? 'Active' : status}
           </span>

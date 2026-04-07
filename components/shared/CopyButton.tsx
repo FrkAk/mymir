@@ -31,7 +31,7 @@ export function CopyButton({ text, label = 'Copy', className = '' }: CopyButtonP
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={handleCopy}
-      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-[--radius-md] border px-3 py-1.5 font-mono text-xs transition-colors min-h-9 ${
+      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-xs transition-colors min-h-9 ${
         copied
           ? 'border-done text-done bg-done-bg'
           : 'border-border-strong text-text-secondary hover:border-accent'

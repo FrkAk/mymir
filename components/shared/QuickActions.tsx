@@ -19,7 +19,7 @@ export function QuickActions({ actions, className = '' }: QuickActionsProps) {
         <button
           key={action.label}
           onClick={action.onClick}
-          className="min-h-9 inline-flex items-center cursor-pointer rounded-[--radius-pill] bg-transparent px-3 py-1 text-xs text-text-secondary shadow-[var(--shadow-button)] transition-opacity hover:opacity-60"
+          className="min-h-9 inline-flex items-center cursor-pointer rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
         >
           {action.label}
         </button>

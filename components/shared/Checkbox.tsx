@@ -27,7 +27,7 @@ export function Checkbox({ checked, onChange, label, className = '' }: CheckboxP
         aria-checked={checked}
         aria-label={label || 'Toggle checkbox'}
         onClick={() => onChange(!checked)}
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[--radius-xs] border-2 transition-colors ${
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
           checked
             ? 'border-done bg-done'
             : 'border-border-strong bg-transparent group-hover:border-text-muted'

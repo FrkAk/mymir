@@ -8,7 +8,7 @@ export function statusChip(status: string): string {
     case 'done': return 'bg-done/10 text-done';
     case 'in_progress': return 'bg-progress/10 text-progress';
     case 'planned': return 'bg-planned/10 text-planned';
-    default: return 'bg-surface-raised text-text-secondary';
+    default: return 'bg-draft/10 text-draft';
   }
 }
 
@@ -22,7 +22,7 @@ export function statusChipText(status: string): string {
     case 'done': return 'text-done';
     case 'in_progress': return 'text-progress';
     case 'planned': return 'text-planned';
-    default: return 'text-text-muted';
+    default: return 'text-draft';
   }
 }
 
@@ -36,7 +36,7 @@ export function statusDot(status: string): string {
     case 'done': return 'bg-done';
     case 'in_progress': return 'bg-progress';
     case 'planned': return 'bg-planned';
-    default: return 'bg-text-muted';
+    default: return 'bg-draft';
   }
 }
 
