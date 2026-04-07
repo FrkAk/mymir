@@ -568,10 +568,10 @@ export function TaskTab({
       </div>
 
       {/* Collapse toggles */}
-      <div className="flex shrink-0 items-center border-y border-border">
+      <div className="flex shrink-0 items-center border-t border-border">
         <button
           onClick={toggleSpec}
-          className="flex cursor-pointer items-center gap-2 px-5 py-1.5 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-hover"
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
         >
           <svg
             viewBox="0 0 16 16"
@@ -582,10 +582,10 @@ export function TaskTab({
           </svg>
           {specCollapsed ? 'Show spec' : 'Hide spec'}
         </button>
-        <span className="h-3 w-px bg-border" />
+        <span className="h-3 w-px bg-border-strong" />
         <button
           onClick={toggleChat}
-          className="flex cursor-pointer items-center gap-2 px-5 py-1.5 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-hover"
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
         >
           <svg
             viewBox="0 0 16 16"
@@ -837,7 +837,7 @@ function RelationshipsSection({
             const other = taskMap.get(otherId);
             const { label, color } = edgeLabel(e, taskId);
             return (
-              <div key={e.id} className="group/edge -mx-1 rounded-lg px-3 py-1.5 transition-colors duration-100 hover:bg-surface">
+              <div key={e.id} className="group/edge -mx-1 rounded-md px-3 py-1.5 transition-colors duration-100 hover:bg-surface-raised">
                 <div className="flex items-center gap-2">
                   <span className={`shrink-0 font-mono text-[10px] font-semibold uppercase tracking-wider ${color}`}>
                     {label}
@@ -873,7 +873,7 @@ function RelationshipsSection({
 
       {/* Add relationship form */}
       {adding ? (
-        <div className="mt-2 overflow-hidden rounded-lg border border-border-strong/60 bg-surface-raised/40">
+        <div className="mt-2 overflow-hidden rounded-lg border border-border bg-surface-raised/40">
           {/* Relation mode toggle — segmented control */}
           <div className="flex border-b border-border">
             {RELATION_MODES.map(({ mode, label, accent }) => {
@@ -912,7 +912,7 @@ function RelationshipsSection({
               />
               {/* Dropdown */}
               {!selectedTarget && search && candidates.length > 0 && (
-                <div className="absolute inset-x-0 top-full z-10 mt-1 max-h-[140px] overflow-y-auto rounded-lg border border-border-strong bg-surface shadow-lg shadow-black/20">
+                <div className="absolute inset-x-0 top-full z-10 mt-1 max-h-[140px] overflow-y-auto rounded-lg border border-border bg-surface shadow-[var(--shadow-float)]">
                   {candidates.slice(0, 8).map(([id, t]) => (
                     <button
                       key={id}
@@ -926,7 +926,7 @@ function RelationshipsSection({
                 </div>
               )}
               {!selectedTarget && search && candidates.length === 0 && (
-                <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border-strong bg-surface px-2.5 py-2 text-[11px] text-text-muted shadow-lg shadow-black/20">
+                <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-[11px] text-text-muted shadow-[var(--shadow-float)]">
                   No matching tasks
                 </div>
               )}

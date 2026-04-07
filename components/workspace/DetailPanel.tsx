@@ -53,7 +53,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 /** Status colors for the stepper. */
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'text-text-muted',
+  draft: 'text-draft',
   planned: 'text-planned',
   in_progress: 'text-progress',
   done: 'text-done',
@@ -61,7 +61,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 /** Header gradient keyed to task status. */
 const STATUS_HEADER: Record<string, { gradient: string; border: string; badge: string }> = {
-  draft: { gradient: 'from-text-muted/10 via-text-muted/3 to-transparent', border: 'border-text-muted/20', badge: 'bg-text-muted/15 text-text-muted' },
+  draft: { gradient: 'from-draft/10 via-draft/3 to-transparent', border: 'border-draft/20', badge: 'bg-draft/12 text-draft' },
   planned: { gradient: 'from-planned/15 via-planned/4 to-transparent', border: 'border-planned/25', badge: 'bg-planned/15 text-planned' },
   in_progress: { gradient: 'from-progress/15 via-progress/4 to-transparent', border: 'border-progress/25', badge: 'bg-progress/15 text-progress' },
   done: { gradient: 'from-done/20 via-done/5 to-transparent', border: 'border-done/30', badge: 'bg-done/15 text-done' },
@@ -216,12 +216,12 @@ export function DetailPanel({
                 if (e.key === 'Escape') { titleCancelledRef.current = true; e.currentTarget.blur(); }
               }}
               autoFocus
-              className="w-full rounded-lg border border-border-strong bg-surface px-2 py-1 font-display text-lg font-bold text-text-primary leading-tight outline-none transition-colors duration-150 focus:border-accent mb-1.5"
+              className="w-full rounded-lg border border-border-strong bg-surface px-2 py-1 text-lg font-bold text-text-primary leading-tight outline-none transition-colors duration-150 focus:border-accent mb-1.5"
             />
           ) : (
             <h2
               onClick={() => setEditingTitle(true)}
-              className="group/title relative cursor-pointer rounded-lg border border-transparent px-2 py-1 font-display text-lg font-bold text-text-primary leading-tight mb-1.5 transition-all duration-150 hover:border-border hover:bg-surface/50"
+              className="group/title relative cursor-pointer rounded-lg border border-transparent px-2 py-1 text-lg font-bold text-text-primary leading-tight mb-1.5 transition-all duration-150 hover:border-border hover:bg-surface/50"
             >
               {localTitle}
               <svg viewBox="0 0 16 16" fill="currentColor" className="absolute right-2 top-2 h-3 w-3 text-text-muted opacity-0 transition-opacity duration-150 group-hover/title:opacity-100">
@@ -243,12 +243,12 @@ export function DetailPanel({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.1 }}
                     onClick={() => categories.length > 0 && setCategoryOpen(true)}
-                    className={`cursor-pointer inline-flex items-center gap-1.5 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
+                    className={`cursor-pointer inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
                       task.category
-                        ? 'border-border-strong bg-surface-raised/50 text-text-secondary hover:bg-surface-hover'
+                        ? 'bg-accent/8 text-accent-light hover:bg-accent/12'
                         : categories.length > 0
-                          ? 'border-dashed border-border-strong text-text-muted/30 hover:border-text-muted/30 hover:text-text-muted/50'
-                          : 'border-dashed border-border-strong text-text-muted/30'
+                          ? 'border border-dashed border-border-strong text-text-muted/30 hover:text-text-muted/50'
+                          : 'border border-dashed border-border-strong text-text-muted/30'
                     }`}
                   >
                     {task.category ?? 'Uncategorized'}
@@ -273,10 +273,10 @@ export function DetailPanel({
                         <button
                           key={cat}
                           onClick={() => { handleCategoryChange(isCurrent ? null : cat); setCategoryOpen(false); }}
-                          className={`shrink-0 cursor-pointer rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
+                          className={`shrink-0 cursor-pointer rounded-md px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
                             isCurrent
-                              ? 'border-border-strong bg-surface-raised/50 text-text-secondary'
-                              : 'border-transparent text-text-muted/40 hover:bg-surface-hover hover:text-text-muted'
+                              ? 'bg-accent/10 text-accent-light'
+                              : 'text-text-muted/40 hover:bg-surface-hover hover:text-text-muted'
                           }`}
                         >
                           {cat}
@@ -291,7 +291,7 @@ export function DetailPanel({
             {/* Tags (right) — editable */}
             <div className="flex flex-wrap items-center justify-end gap-1 ml-auto min-w-0">
               {((task.tags as string[] | null) ?? []).map((tag) => (
-                <span key={tag} className="group/tag inline-flex items-center gap-0.5 rounded-md bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                <span key={tag} className="group/tag inline-flex items-center gap-0.5 rounded-md bg-accent/8 px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent-light">
                   {tag}
                   <button
                     onClick={() => handleRemoveTag(tag)}

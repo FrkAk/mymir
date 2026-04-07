@@ -318,7 +318,7 @@ export function StructureView({
 
       {/* Progress summary */}
       {totalTasks > 0 && (
-        <div className="mb-3 rounded-xl border border-border bg-surface px-4 py-3">
+        <div className="mb-3 rounded-xl border border-border bg-surface px-4 py-3 shadow-[var(--shadow-card)]">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-text-muted">
               Progress
@@ -327,7 +327,7 @@ export function StructureView({
           </div>
           <div className="h-1.5 rounded-full bg-border overflow-hidden">
             <motion.div
-              className={`h-full rounded-full bg-gradient-to-r from-accent to-done ${progressPct > 0 && progressPct < 100 ? 'progress-shimmer' : ''}`}
+              className={`h-full rounded-full ${progressPct === 100 ? 'bg-done' : 'bg-gradient-to-r from-accent to-done'} ${progressPct > 0 && progressPct < 100 ? 'progress-shimmer' : ''}`}
               initial={{ width: 0 }}
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -362,7 +362,7 @@ export function StructureView({
       )}
 
       {/* Unified Filter & Categories panel */}
-      <div className="mb-2 rounded-xl border border-border bg-surface overflow-hidden">
+      <div className="mb-2 rounded-xl border border-border bg-surface shadow-[var(--shadow-card)] overflow-hidden">
         {/* Search */}
         <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
           <svg viewBox="0 0 16 16" fill="currentColor" className={`h-3 w-3 shrink-0 transition-colors ${searchQuery ? 'text-accent' : 'text-text-muted/50'}`}>
@@ -754,7 +754,7 @@ export function StructureView({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.1 }}
-                        className="absolute right-0 top-full z-10 mt-1 min-w-[120px] rounded-lg border border-border bg-surface-raised p-1 shadow-lg"
+                        className="absolute right-0 top-full z-10 mt-1 min-w-[120px] rounded-lg border border-border bg-surface-raised p-1 shadow-[var(--shadow-float)]"
                       >
                         <button
                           onClick={() => { setRenamingDrawer(cat); setRenameValue(cat); setMenuOpen(null); }}
@@ -826,7 +826,7 @@ export function StructureView({
                           onClick={() => onSelectNode(task.id)}
                           className={`flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-all duration-150 hover:bg-surface-hover ${
                             selectedNodeId === task.id
-                              ? 'bg-accent/8 ring-1 ring-accent/20'
+                              ? 'bg-accent/8 border border-accent/15'
                               : ''
                           }`}
                         >

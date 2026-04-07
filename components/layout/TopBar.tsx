@@ -37,7 +37,7 @@ export function TopBar({ projectName, stageLabel, taskStats }: TopBarProps) {
       <div className="flex w-full items-center justify-between px-4 sm:px-6">
         {/* Left: Logo + breadcrumb */}
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-gradient font-display text-lg font-bold no-underline">
+          <Link href="/" className="text-text-primary text-lg font-semibold tracking-tight no-underline">
             Mymir
           </Link>
           {projectName && (

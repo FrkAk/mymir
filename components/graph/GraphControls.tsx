@@ -31,7 +31,7 @@ export function GraphControls({
 }: GraphControlsProps) {
   return (
     <div
-      className={`absolute bottom-4 right-4 flex flex-col gap-1 rounded-lg bg-surface p-1 border border-border ${className}`}
+      className={`absolute bottom-4 right-4 flex flex-col gap-1 rounded-lg border border-border bg-surface p-1 shadow-[var(--shadow-float)] ${className}`}
     >
       <ControlButton label="Zoom in" onClick={onZoomIn}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

@@ -42,14 +42,14 @@ export interface GraphLink extends SimulationLinkDatum<GraphNode> {
 export const NODE_RADIUS_DEFAULT = 14;
 
 export const EDGE_COLOR: Record<EdgeType, string> = {
-  depends_on: "#818cf8",
+  depends_on: "#55b3ff",
   relates_to: "#a78bfa",
 };
 
 export const RELATES_DASH: number[] = [4, 6];
 export const RELATES_OPACITY = 0.6;
 
-export const ACCENT = "#e09100";
+export const ACCENT = "#818cf8";
 
 export const ZOOM_FACTOR = 1.2;
 export const MIN_ZOOM = 0.1;
@@ -108,30 +108,30 @@ export interface ThemeColors {
 }
 
 export const DARK_THEME: ThemeColors = {
-  labelText: "#e2e8f0",
-  labelDimmed: "rgba(226,232,240,0.2)",
-  hoverGlow: "rgba(226,232,240,0.4)",
-  tooltipBg: "rgba(15,23,42,0.95)",
-  tooltipBorder: "rgba(255,255,255,0.15)",
-  tooltipText: "#f1f5f9",
-  taskBorder: "#0f172a",
-  statusDraft: "#64748b",
-  statusPlanned: "#22d3ee",
-  statusInProgress: "#f59e0b",
-  statusDone: "#10b981",
-  surface: "rgba(15,23,42,0.85)",
+  labelText: "#f9f9f9",
+  labelDimmed: "rgba(249,249,249,0.2)",
+  hoverGlow: "rgba(249,249,249,0.4)",
+  tooltipBg: "rgba(7,8,10,0.95)",
+  tooltipBorder: "rgba(255,255,255,0.10)",
+  tooltipText: "#f9f9f9",
+  taskBorder: "#07080a",
+  statusDraft: "#9ca3af",
+  statusPlanned: "#55b3ff",
+  statusInProgress: "#ffbc33",
+  statusDone: "#5fc992",
+  surface: "rgba(7,8,10,0.85)",
 };
 
 export const LIGHT_THEME: ThemeColors = {
-  labelText: "#1e293b",
-  labelDimmed: "rgba(30,41,59,0.2)",
-  hoverGlow: "rgba(30,41,59,0.2)",
+  labelText: "#1a1a1a",
+  labelDimmed: "rgba(26,26,26,0.2)",
+  hoverGlow: "rgba(26,26,26,0.2)",
   tooltipBg: "rgba(255,255,255,0.97)",
-  tooltipBorder: "rgba(0,0,0,0.15)",
-  tooltipText: "#0f172a",
-  taskBorder: "#ffffff",
-  statusDraft: "#94a3b8",
-  statusPlanned: "#0891b2",
+  tooltipBorder: "rgba(0,0,0,0.10)",
+  tooltipText: "#1a1a1a",
+  taskBorder: "#f0f1f3",
+  statusDraft: "#6b7280",
+  statusPlanned: "#3b82f6",
   statusInProgress: "#d97706",
   statusDone: "#059669",
   surface: "rgba(255,255,255,0.85)",
@@ -155,8 +155,8 @@ export function getCanvasTheme(): ThemeColors {
     return {
       ...base,
       labelText: textPrimary,
-      labelDimmed: isLight ? "rgba(30,41,59,0.2)" : "rgba(226,232,240,0.2)",
-      surface: isLight ? "rgba(255,255,255,0.85)" : "rgba(15,23,42,0.85)",
+      labelDimmed: isLight ? "rgba(26,26,26,0.2)" : "rgba(249,249,249,0.2)",
+      surface: isLight ? "rgba(255,255,255,0.85)" : "rgba(7,8,10,0.85)",
       tooltipText: textPrimary,
       statusDraft: read("--color-todo") || base.statusDraft,
       statusDone: read("--color-done") || base.statusDone,

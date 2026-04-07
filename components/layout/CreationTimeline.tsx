@@ -48,12 +48,12 @@ export function CreationTimeline({ currentStep }: CreationTimelineProps) {
                       isActive
                         ? {
                             boxShadow: [
-                              '0 0 0 0px rgba(224, 145, 0, 0)',
-                              '0 0 0 6px rgba(224, 145, 0, 0.12)',
-                              '0 0 0 0px rgba(224, 145, 0, 0)',
+                              '0 0 0 0px rgba(129, 140, 248, 0)',
+                              '0 0 0 6px rgba(129, 140, 248, 0.12)',
+                              '0 0 0 0px rgba(129, 140, 248, 0)',
                             ],
                           }
-                        : { boxShadow: '0 0 0 0px rgba(224, 145, 0, 0)' }
+                        : { boxShadow: '0 0 0 0px rgba(129, 140, 248, 0)' }
                     }
                     transition={
                       isActive

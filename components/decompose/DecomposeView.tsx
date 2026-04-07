@@ -154,20 +154,15 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
     <>
       <TopBar projectName={graph?.title ?? 'New Project'} stageLabel="Decompose" />
       <PageShell>
-        <div className="mb-6 flex items-center gap-3">
-          <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-accent">
-            Decompose
-          </span>
-          <span className="h-3 w-px bg-border-strong" />
-          <span className="font-body text-sm text-text-secondary">
-            {graph?.title ?? 'New Project'}
-          </span>
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-text-primary mb-1">Decompose</h1>
+          <p className="text-sm text-text-muted truncate">{graph?.title ?? 'New Project'}</p>
         </div>
 
         {/* === STATUS STRIP === */}
         <motion.div
           layout
-          className="mb-8 overflow-hidden rounded-xl border border-border bg-surface"
+          className="mb-8 overflow-hidden rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]"
         >
           {/* Progress bar */}
           <div className="h-0.5 w-full bg-surface-raised">
@@ -299,7 +294,7 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
                     {task.tags.length > 0 && (
                       <div className="flex gap-1">
                         {task.tags.map((tag) => (
-                          <span key={tag} className="rounded-md bg-surface px-1.5 py-0.5 font-mono text-[10px] text-text-muted">
+                          <span key={tag} className="rounded-md bg-accent/8 px-1.5 py-0.5 font-mono text-[10px] text-accent-light">
                             {tag}
                           </span>
                         ))}
@@ -322,7 +317,7 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
                   key={msg.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-xl border border-border bg-surface/40 px-5 py-4"
+                  className="rounded-xl border border-border bg-surface/40 px-5 py-4 shadow-[var(--shadow-card)]"
                 >
                   <div className="prose-chat text-sm text-text-secondary">
                     <Markdown>{text}</Markdown>

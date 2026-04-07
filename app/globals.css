@@ -1,55 +1,48 @@
 @import "tailwindcss";
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/600.css";
-@import "@fontsource/playfair-display/400.css";
-@import "@fontsource/playfair-display/600.css";
-@import "@fontsource/playfair-display/700.css";
-@import "@fontsource/dm-sans/400.css";
-@import "@fontsource/dm-sans/500.css";
-@import "@fontsource/dm-sans/600.css";
-@import "@fontsource/dm-sans/700.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist-mono";
 
 @theme {
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-body: "DM Sans", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-body: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "GeistMono Variable", "GeistMono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Dark mode (default) */
-  --color-base: #0a0e13;
-  --color-surface: #12171e;
-  --color-surface-raised: #1a2029;
-  --color-surface-hover: #232b38;
-  --color-border: rgba(255, 255, 255, 0.05);
+  /* Dark mode (default) — Raycast near-black blue */
+  --color-base: #07080a;
+  --color-surface: #101111;
+  --color-surface-raised: #1b1c1e;
+  --color-surface-hover: #252829;
+  --color-border: rgba(255, 255, 255, 0.06);
   --color-border-strong: rgba(255, 255, 255, 0.10);
 
-  --color-text-primary: #e8edf4;
-  --color-text-secondary: #7d8694;
-  --color-text-muted: #4a5568;
+  --color-text-primary: #f9f9f9;
+  --color-text-secondary: #cecece;
+  --color-text-muted: #6a6b6c;
 
-  --color-accent: #e09100;
-  --color-accent-light: #ffc233;
-  --color-accent-glow: rgba(224, 145, 0, 0.12);
+  --color-accent: #818cf8;
+  --color-accent-light: #a5b4fc;
+  --color-accent-glow: rgba(129, 140, 248, 0.12);
 
-  --color-done: #10b981;
-  --color-done-bg: rgba(16, 185, 129, 0.10);
-  --color-progress: #f59e0b;
-  --color-progress-bg: rgba(245, 158, 11, 0.10);
-  --color-todo: #64748b;
-  --color-todo-bg: rgba(100, 116, 139, 0.08);
+  --color-done: #5fc992;
+  --color-done-bg: rgba(95, 201, 146, 0.10);
+  --color-progress: #ffbc33;
+  --color-progress-bg: rgba(255, 188, 51, 0.10);
+  --color-todo: #6a6b6c;
+  --color-todo-bg: rgba(106, 107, 108, 0.08);
 
-  --color-planned: #22d3ee;
-  --color-danger: #f87171;
+  --color-draft: #9ca3af;
+  --color-planned: #55b3ff;
+  --color-danger: #FF6363;
 
-  --color-depends: #818cf8;
+  --color-depends: #55b3ff;
   --color-relates: #a78bfa;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-
-  --shadow-glow-accent: 0 0 8px rgba(224, 145, 0, 0.3);
-  --shadow-glow-done: 0 0 8px rgba(16, 185, 129, 0.3);
+  /* Depth shadows — used alongside border-border for the modern hybrid look */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-button: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-glow-accent: 0 0 8px rgba(129, 140, 248, 0.3);
+  --shadow-glow-done: 0 0 8px rgba(95, 201, 146, 0.3);
 
   --topbar-h: 3.5rem;
 }
@@ -58,24 +51,29 @@
    LIGHT MODE overrides
    =========================================== */
 html.light {
-  --color-base: #f4f1ec;
+  --color-base: #f0f1f3;
   --color-surface: #ffffff;
-  --color-surface-raised: #f0ede8;
-  --color-surface-hover: #e8e4de;
-  --color-border: rgba(0, 0, 0, 0.12);
-  --color-border-strong: rgba(0, 0, 0, 0.20);
+  --color-surface-raised: #f5f6f8;
+  --color-surface-hover: #e8eaed;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.15);
 
   --color-text-primary: #1a1a1a;
   --color-text-secondary: #5a5a5a;
   --color-text-muted: #9a9a9a;
 
-  --color-accent: #c47d00;
-  --color-accent-light: #e09100;
-  --color-accent-glow: rgba(196, 125, 0, 0.08);
+  --color-accent: #6366f1;
+  --color-accent-light: #818cf8;
+  --color-accent-glow: rgba(99, 102, 241, 0.08);
 
-  --color-done-bg: rgba(16, 185, 129, 0.08);
-  --color-progress-bg: rgba(245, 158, 11, 0.08);
-  --color-todo-bg: rgba(100, 116, 139, 0.06);
+  --color-done-bg: rgba(95, 201, 146, 0.08);
+  --color-progress-bg: rgba(255, 188, 51, 0.08);
+  --color-todo-bg: rgba(106, 107, 108, 0.06);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-button: inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 :root {
@@ -110,6 +108,9 @@ html {
   background-color: var(--color-base);
   color: var(--color-text-primary);
   font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.012em;
+  font-feature-settings: "calt" 1, "kern" 1, "liga" 1, "ss03" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -122,7 +123,7 @@ body {
 }
 
 /* ===========================================
-   ATMOSPHERE: Dark mode only layers
+   ATMOSPHERE: Dark mode layers
    =========================================== */
 
 html:not(.light) body::before {
@@ -132,8 +133,8 @@ html:not(.light) body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 15% -10%, rgba(224, 145, 0, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 85% 100%, rgba(129, 140, 248, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 15% -10%, rgba(129, 140, 248, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 100%, rgba(99, 102, 241, 0.03) 0%, transparent 50%);
 }
 
 html:not(.light) body::after {
@@ -143,14 +144,14 @@ html:not(.light) body::after {
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(129, 140, 248, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(129, 140, 248, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(129, 140, 248, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 140, 248, 0.015) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 120% 80% at 50% 30%, black 30%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse 120% 80% at 50% 30%, black 30%, transparent 80%);
 }
 
-/* Light mode: subtle warm paper texture */
+/* Light mode: subtle cool texture */
 html.light body::before {
   content: "";
   position: fixed;
@@ -158,7 +159,7 @@ html.light body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(196, 125, 0, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(99, 102, 241, 0.03) 0%, transparent 60%),
     radial-gradient(ellipse 50% 40% at 80% 100%, rgba(129, 140, 248, 0.02) 0%, transparent 50%);
 }
 
@@ -171,7 +172,7 @@ html:not(.light) #__next::before {
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.3;
+  opacity: 0.15;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
@@ -193,10 +194,10 @@ html:not(.light) #__next::before {
   transition: opacity 0.3s ease;
 }
 html:not(.light) .glow-card::before {
-  background: linear-gradient(135deg, rgba(224, 145, 0, 0.18) 0%, transparent 40%, transparent 60%, rgba(129, 140, 248, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.15) 0%, transparent 40%, transparent 60%, rgba(99, 102, 241, 0.08) 100%);
 }
 html.light .glow-card::before {
-  background: linear-gradient(135deg, rgba(196, 125, 0, 0.1) 0%, transparent 40%, transparent 60%, rgba(129, 140, 248, 0.06) 100%);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, transparent 40%, transparent 60%, rgba(129, 140, 248, 0.04) 100%);
 }
 .glow-card:hover::before {
   opacity: 1;
@@ -237,7 +238,7 @@ html.light ::-webkit-scrollbar-thumb:hover {
    SELECTION
    =========================================== */
 ::selection {
-  background: rgba(224, 145, 0, 0.25);
+  background: rgba(129, 140, 248, 0.25);
   color: inherit;
 }
 
@@ -246,7 +247,7 @@ html.light ::-webkit-scrollbar-thumb:hover {
    =========================================== */
 .text-gradient {
   color: var(--color-accent-light);
-  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 50%, #c06e00 100%);
+  background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 50%, #6366f1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -267,7 +268,7 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background-clip: padding-box, border-box;
   background-image:
     linear-gradient(var(--color-surface), var(--color-surface)),
-    linear-gradient(135deg, transparent 60%, rgba(224, 145, 0, 0.3) 75%, rgba(129, 140, 248, 0.2) 85%, transparent 95%);
+    linear-gradient(135deg, transparent 60%, rgba(129, 140, 248, 0.3) 75%, rgba(99, 102, 241, 0.2) 85%, transparent 95%);
 }
 
 @supports (background: conic-gradient(from 0deg, red, red)) {
@@ -275,7 +276,7 @@ html.light ::-webkit-scrollbar-thumb:hover {
     --angle: 0deg;
     background-image:
       linear-gradient(var(--color-surface), var(--color-surface)),
-      conic-gradient(from var(--angle), transparent 60%, rgba(224, 145, 0, 0.3) 75%, rgba(129, 140, 248, 0.2) 85%, transparent 95%);
+      conic-gradient(from var(--angle), transparent 60%, rgba(129, 140, 248, 0.3) 75%, rgba(99, 102, 241, 0.2) 85%, transparent 95%);
     animation: spin-border 6s linear infinite;
   }
 }
@@ -289,7 +290,7 @@ html.light ::-webkit-scrollbar-thumb:hover {
    =========================================== */
 .prose-chat {
   line-height: 1.65;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.012em;
 }
 .prose-chat p {
   margin: 0 0 0.6em;
@@ -378,17 +379,17 @@ html.light .prose-chat pre {
   color: var(--color-accent);
   text-decoration: underline;
   text-underline-offset: 2px;
-  text-decoration-color: rgba(224, 145, 0, 0.3);
+  text-decoration-color: rgba(129, 140, 248, 0.3);
   transition: text-decoration-color 0.2s;
 }
 .prose-chat a:hover {
-  text-decoration-color: rgba(224, 145, 0, 0.8);
+  text-decoration-color: rgba(129, 140, 248, 0.8);
 }
 
 /* Compact prose for spec sections (tighter than prose-chat) */
 .prose-spec {
   line-height: 1.5;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.012em;
 }
 .prose-spec p {
   margin: 0 0 0.25em;
@@ -468,7 +469,7 @@ html.light .prose-spec pre {
   color: var(--color-accent);
   text-decoration: underline;
   text-underline-offset: 2px;
-  text-decoration-color: rgba(224, 145, 0, 0.3);
+  text-decoration-color: rgba(129, 140, 248, 0.3);
 }
 .prose-spec blockquote {
   border-left: 2px solid var(--color-accent);
@@ -476,7 +477,7 @@ html.light .prose-spec pre {
   padding-left: 0.75em;
 }
 .prose-spec a:hover {
-  text-decoration-color: rgba(224, 145, 0, 0.8);
+  text-decoration-color: rgba(129, 140, 248, 0.8);
 }
 /* Mute all prose-spec children when parent has line-through (checked criteria) */
 .line-through .prose-spec strong,

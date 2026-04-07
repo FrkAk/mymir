@@ -4,7 +4,7 @@ const statusStyles: Record<string, { dot: string; bg: string; text: string }> = 
   done: { dot: 'bg-done', bg: 'bg-done/15', text: 'text-done' },
   planned: { dot: 'bg-planned', bg: 'bg-planned/15', text: 'text-planned' },
   in_progress: { dot: 'bg-progress', bg: 'bg-progress/15', text: 'text-progress' },
-  draft: { dot: 'bg-text-muted', bg: 'bg-text-muted/15', text: 'text-text-secondary' },
+  draft: { dot: 'bg-draft', bg: 'bg-draft/12', text: 'text-draft' },
   depends_on: { dot: 'bg-depends', bg: 'bg-depends/15', text: 'text-depends' },
   relates_to: { dot: 'bg-relates', bg: 'bg-relates/15', text: 'text-relates' },
 };
@@ -31,7 +31,7 @@ export function Badge({ status, className = '' }: BadgeProps) {
     <span
       role="status"
       aria-label={`Status: ${label}`}
-      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 ${style.bg} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 ${style.bg} ${className}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
       <span className={`font-mono text-xs font-semibold uppercase tracking-wider ${style.text}`}>

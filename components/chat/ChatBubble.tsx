@@ -40,7 +40,7 @@ export function ChatBubble({ role, content, toolCalls, isFirstInGroup = true, is
         className={`max-w-[85%] lg:max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${topRadius} ${
           isUser
             ? `bg-accent/10 text-text-primary ${tailRadius}`
-            : `bg-surface-raised text-text-primary border border-border ${tailRadius}`
+            : `bg-surface-raised text-text-primary border border-border shadow-[var(--shadow-card)] ${tailRadius}`
         }`}
       >
         {isUser ? (
