@@ -500,7 +500,7 @@ export function ForceGraph({
         const label = hovEdge.type === "depends_on" ? "depends" : "relates";
         const edgeColor = EDGE_COLOR[hovEdge.type as EdgeType] ?? "#6b7280";
         ctx.globalAlpha = 0.9;
-        ctx.font = `700 8px "JetBrains Mono", monospace`;
+        ctx.font = `700 8px "GeistMono Variable", "GeistMono", monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const tw = ctx.measureText(label).width + 8;
@@ -617,7 +617,7 @@ export function ForceGraph({
         const label = n.title.length > 18
           ? n.title.slice(0, 17) + "\u2026"
           : n.title;
-        ctx.font = `500 12px "DM Sans", sans-serif`;
+        ctx.font = `500 12px "Inter Variable", "Inter", sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
 
@@ -648,7 +648,7 @@ export function ForceGraph({
     const tip = tooltipRef.current;
     if (tip) {
       ctx.save();
-      ctx.font = '11px "JetBrains Mono", monospace';
+      ctx.font = '11px "GeistMono Variable", "GeistMono", monospace';
       const metrics = ctx.measureText(tip.text);
       const pw = 10;
       const tw = metrics.width + pw * 2;
@@ -934,7 +934,7 @@ function GraphLegend({ hiddenStatuses, onToggleStatus }: {
 }) {
   const [collapsed, setCollapsed] = useState(false);
   return (
-    <div className="absolute bottom-4 left-3 z-10 rounded-md border border-border bg-surface px-2.5 py-2">
+    <div className="absolute bottom-4 left-3 z-10 rounded-[--radius-md] bg-surface px-2.5 py-2 shadow-[var(--shadow-card)]">
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}

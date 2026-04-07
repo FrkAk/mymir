@@ -46,7 +46,7 @@ export function TaskList({ tasks }: TaskListProps) {
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1, duration: 0.3 }}
-          className="rounded-xl border border-border bg-surface p-4"
+          className="rounded-[--radius-lg] bg-surface p-4 shadow-[var(--shadow-card)]"
         >
           <div className="mb-2 flex items-center gap-3">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 font-mono text-xs font-semibold text-accent">

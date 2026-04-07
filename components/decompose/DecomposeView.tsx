@@ -167,7 +167,7 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
         {/* === STATUS STRIP === */}
         <motion.div
           layout
-          className="mb-8 overflow-hidden rounded-xl border border-border bg-surface"
+          className="mb-8 overflow-hidden rounded-[--radius-lg] bg-surface shadow-[var(--shadow-card)]"
         >
           {/* Progress bar */}
           <div className="h-0.5 w-full bg-surface-raised">
@@ -322,7 +322,7 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
                   key={msg.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="rounded-xl border border-border bg-surface/40 px-5 py-4"
+                  className="rounded-[--radius-lg] bg-surface/40 px-5 py-4 shadow-[var(--shadow-card)]"
                 >
                   <div className="prose-chat text-sm text-text-secondary">
                     <Markdown>{text}</Markdown>

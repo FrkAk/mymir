@@ -25,7 +25,7 @@ export function IdeaInput({ onSubmit }: IdeaInputProps) {
       transition={{ duration: 0.5 }}
       className="flex min-h-[60vh] flex-col items-center justify-center"
     >
-      <h1 className="font-display text-3xl font-bold text-gradient mb-3">
+      <h1 className="text-3xl font-bold text-gradient mb-3">
         What are you building?
       </h1>
       <p className="text-text-secondary mb-8 text-center max-w-md">
@@ -38,7 +38,7 @@ export function IdeaInput({ onSubmit }: IdeaInputProps) {
         onChange={(e) => setIdea(e.target.value)}
         placeholder="A habit tracker app that helps people build daily routines with streaks and reminders..."
         rows={5}
-        className="mb-6 w-full max-w-lg resize-none rounded-xl border border-border-strong bg-surface px-5 py-4 text-sm leading-relaxed text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent"
+        className="mb-6 w-full max-w-lg resize-none rounded-[--radius-md] border border-border-strong bg-base px-5 py-4 text-sm leading-relaxed text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent"
       />
 
       <Button

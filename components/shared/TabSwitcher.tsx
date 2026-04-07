@@ -52,7 +52,7 @@ export function TabSwitcher({ tabs, activeTab, onTabChange, trailing, stretch, c
   );
 
   return (
-    <div role="tablist" aria-label="Tab navigation" className={`flex items-center gap-1 rounded-lg bg-surface-raised p-1 ${className}`}>
+    <div role="tablist" aria-label="Tab navigation" className={`flex items-center gap-0.5 rounded-[--radius-md] bg-surface-raised/60 p-0.5 ${className}`}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -62,14 +62,14 @@ export function TabSwitcher({ tabs, activeTab, onTabChange, trailing, stretch, c
           tabIndex={activeTab === tab.id ? 0 : -1}
           onClick={() => onTabChange(tab.id)}
           onKeyDown={handleKeyDown}
-          className={`relative cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors min-h-9 ${stretch ? 'flex-1' : ''} ${
-            activeTab === tab.id ? 'text-text-primary' : 'text-text-muted hover:text-text-secondary'
+          className={`relative cursor-pointer rounded-[--radius-sm] px-3 py-1.5 text-sm transition-opacity min-h-9 ${stretch ? 'flex-1' : ''} ${
+            activeTab === tab.id ? 'text-text-primary font-medium' : 'text-text-muted hover:text-text-secondary hover:opacity-80'
           }`}
         >
           {activeTab === tab.id && (
             <motion.div
               layoutId="tab-indicator"
-              className="absolute inset-0 rounded-md bg-surface-raised"
+              className="absolute inset-0 rounded-[--radius-sm] bg-surface shadow-[var(--shadow-button)]"
               style={{ zIndex: -1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             />

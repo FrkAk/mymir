@@ -26,7 +26,7 @@ export function ToolCallDisplay({ name, args, className = '' }: ToolCallDisplayP
     <div className={className}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="cursor-pointer rounded border border-border bg-surface-raised px-2 py-1 font-mono text-xs text-text-muted transition-colors hover:bg-surface-hover"
+        className="cursor-pointer rounded-[--radius-sm] bg-surface-raised px-2 py-1 font-mono text-xs text-text-muted shadow-[var(--shadow-card)] transition-opacity hover:opacity-60"
       >
         [Tool: {name}({argSummary})]
       </button>
@@ -37,7 +37,7 @@ export function ToolCallDisplay({ name, args, className = '' }: ToolCallDisplayP
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-1 overflow-hidden rounded border border-border bg-surface"
+            className="mt-1 overflow-hidden rounded-[--radius-md] bg-surface shadow-[var(--shadow-card)]"
           >
             <div className="flex justify-end px-2 pt-1.5">
               <CopyButton text={JSON.stringify(args, null, 2)} label="Copy" className="text-[10px] py-0.5 px-1.5" />

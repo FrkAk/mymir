@@ -23,7 +23,7 @@ export default async function HomePage() {
       <AutoRefresh />
       <TopBar />
       <PageShell>
-        <h1 className="font-display text-3xl font-bold text-gradient mb-2">
+        <h1 className="text-3xl font-bold text-gradient mb-2">
           Your Projects
         </h1>
         <p className="text-text-secondary mb-8">

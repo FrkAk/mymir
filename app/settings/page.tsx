@@ -138,7 +138,7 @@ export default function SettingsPage() {
         >
           &larr; Back to projects
         </Link>
-        <h1 className="font-display text-2xl font-bold text-text-primary mb-1">
+        <h1 className="text-2xl font-bold text-text-primary mb-1">
           Settings
         </h1>
         <p className="text-sm text-text-secondary mb-8">

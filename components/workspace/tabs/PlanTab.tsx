@@ -163,7 +163,7 @@ export function PlanTab({
             </h4>
             <CopyButton text={planningContext} label="Copy" />
           </div>
-          <pre className="max-h-48 overflow-auto rounded-lg border border-border bg-surface-raised p-3 font-mono text-xs text-text-secondary leading-relaxed">
+          <pre className="max-h-48 overflow-auto rounded-[--radius-md] bg-surface-raised shadow-[var(--shadow-card)] p-3 font-mono text-xs text-text-secondary leading-relaxed">
             {planningContext}
           </pre>
         </section>
@@ -213,7 +213,7 @@ export function PlanTab({
             )}
           </div>
         </div>
-        <pre className="max-h-60 overflow-auto rounded-lg border border-border bg-surface-raised p-3 font-mono text-xs text-text-secondary leading-relaxed whitespace-pre-wrap">
+        <pre className="max-h-60 overflow-auto rounded-[--radius-md] bg-surface-raised shadow-[var(--shadow-card)] p-3 font-mono text-xs text-text-secondary leading-relaxed whitespace-pre-wrap">
           {plan}
         </pre>
       </section>

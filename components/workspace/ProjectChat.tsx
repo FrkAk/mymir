@@ -49,7 +49,7 @@ export function ProjectChat({ projectId, onGraphChange, className = '' }: Projec
   return (
     <div className={`flex h-full flex-col ${className}`}>
       <div className="shrink-0 border-b border-border px-5 py-3.5">
-        <h2 className="font-display text-lg font-semibold text-text-primary">
+        <h2 className="text-lg font-semibold text-text-primary">
           Project Chat
         </h2>
         <p className="text-xs text-text-muted">

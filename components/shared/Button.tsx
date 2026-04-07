@@ -13,11 +13,11 @@ const sizes = {
 /** Button variant style maps. */
 const variants = {
   primary:
-    'bg-gradient-to-r from-accent to-accent-light text-white font-semibold hover:brightness-110',
+    'bg-transparent text-text-primary font-semibold border border-border-strong shadow-[var(--shadow-button)] rounded-[--radius-pill]',
   secondary:
-    'bg-surface-raised text-text-primary/80 border border-border-strong hover:bg-surface-hover',
-  ghost: 'bg-transparent text-text-secondary hover:text-text-primary',
-  copy: 'font-mono border border-border-strong hover:border-accent text-text-secondary text-xs',
+    'bg-transparent text-text-primary border border-border-strong shadow-[var(--shadow-button)] rounded-[--radius-sm]',
+  ghost: 'bg-transparent text-text-muted hover:text-text-primary',
+  copy: 'font-mono border border-border-strong hover:border-accent text-text-secondary text-xs rounded-[--radius-sm]',
 } as const;
 
 type ButtonVariant = keyof typeof variants;
@@ -68,7 +68,7 @@ export function Button({
       aria-disabled={isDisabled || undefined}
       type={type}
       onClick={onClick}
-      className={`inline-flex items-center justify-center rounded-[--radius-md] transition-colors ${variants[variant]} ${sizes[size]} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
+      className={`inline-flex items-center justify-center transition-opacity hover:opacity-60 ${variants[variant]} ${sizes[size]} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
     >
       {isLoading ? (
         <span className="flex items-center gap-1">

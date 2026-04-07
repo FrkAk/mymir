@@ -31,7 +31,7 @@ export function Badge({ status, className = '' }: BadgeProps) {
     <span
       role="status"
       aria-label={`Status: ${label}`}
-      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 ${style.bg} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-[--radius-sm] px-2 py-0.5 ${style.bg} ${className}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
       <span className={`font-mono text-xs font-semibold uppercase tracking-wider ${style.text}`}>

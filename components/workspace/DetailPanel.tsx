@@ -216,12 +216,12 @@ export function DetailPanel({
                 if (e.key === 'Escape') { titleCancelledRef.current = true; e.currentTarget.blur(); }
               }}
               autoFocus
-              className="w-full rounded-lg border border-border-strong bg-surface px-2 py-1 font-display text-lg font-bold text-text-primary leading-tight outline-none transition-colors duration-150 focus:border-accent mb-1.5"
+              className="w-full rounded-lg border border-border-strong bg-surface px-2 py-1 text-lg font-bold text-text-primary leading-tight outline-none transition-colors duration-150 focus:border-accent mb-1.5"
             />
           ) : (
             <h2
               onClick={() => setEditingTitle(true)}
-              className="group/title relative cursor-pointer rounded-lg border border-transparent px-2 py-1 font-display text-lg font-bold text-text-primary leading-tight mb-1.5 transition-all duration-150 hover:border-border hover:bg-surface/50"
+              className="group/title relative cursor-pointer rounded-lg border border-transparent px-2 py-1 text-lg font-bold text-text-primary leading-tight mb-1.5 transition-all duration-150 hover:border-border hover:bg-surface/50"
             >
               {localTitle}
               <svg viewBox="0 0 16 16" fill="currentColor" className="absolute right-2 top-2 h-3 w-3 text-text-muted opacity-0 transition-opacity duration-150 group-hover/title:opacity-100">
@@ -243,12 +243,12 @@ export function DetailPanel({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.1 }}
                     onClick={() => categories.length > 0 && setCategoryOpen(true)}
-                    className={`cursor-pointer inline-flex items-center gap-1.5 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
+                    className={`cursor-pointer inline-flex items-center gap-1.5 rounded-[--radius-sm] px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
                       task.category
-                        ? 'border-border-strong bg-surface-raised/50 text-text-secondary hover:bg-surface-hover'
+                        ? 'bg-surface-raised text-text-secondary shadow-[var(--shadow-card)] hover:opacity-60'
                         : categories.length > 0
-                          ? 'border-dashed border-border-strong text-text-muted/30 hover:border-text-muted/30 hover:text-text-muted/50'
-                          : 'border-dashed border-border-strong text-text-muted/30'
+                          ? 'border border-dashed border-border-strong text-text-muted/30 hover:text-text-muted/50'
+                          : 'border border-dashed border-border-strong text-text-muted/30'
                     }`}
                   >
                     {task.category ?? 'Uncategorized'}
@@ -273,10 +273,10 @@ export function DetailPanel({
                         <button
                           key={cat}
                           onClick={() => { handleCategoryChange(isCurrent ? null : cat); setCategoryOpen(false); }}
-                          className={`shrink-0 cursor-pointer rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
+                          className={`shrink-0 cursor-pointer rounded-[--radius-sm] px-1.5 py-0.5 font-mono text-[10px] font-medium transition-all ${
                             isCurrent
-                              ? 'border-border-strong bg-surface-raised/50 text-text-secondary'
-                              : 'border-transparent text-text-muted/40 hover:bg-surface-hover hover:text-text-muted'
+                              ? 'bg-surface-raised text-text-secondary shadow-[var(--shadow-card)]'
+                              : 'text-text-muted/40 hover:text-text-muted hover:opacity-80'
                           }`}
                         >
                           {cat}
@@ -291,7 +291,7 @@ export function DetailPanel({
             {/* Tags (right) — editable */}
             <div className="flex flex-wrap items-center justify-end gap-1 ml-auto min-w-0">
               {((task.tags as string[] | null) ?? []).map((tag) => (
-                <span key={tag} className="group/tag inline-flex items-center gap-0.5 rounded-md bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                <span key={tag} className="group/tag inline-flex items-center gap-0.5 rounded-[--radius-sm] bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] font-medium text-text-secondary shadow-[var(--shadow-card)]">
                   {tag}
                   <button
                     onClick={() => handleRemoveTag(tag)}
@@ -347,12 +347,12 @@ export function DetailPanel({
                   )}
                   <button
                     onClick={() => handleStatusChange(status)}
-                    className={`relative cursor-pointer rounded-md px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all ${
+                    className={`relative cursor-pointer rounded-[--radius-sm] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all ${
                       isCurrent
-                        ? `${color} bg-surface-raised ring-1 ring-current/20`
+                        ? `${color} bg-surface-raised shadow-[var(--shadow-button)]`
                         : isPast
-                          ? 'text-done/60 hover:bg-surface-hover'
-                          : 'text-text-muted/50 hover:bg-surface-hover hover:text-text-muted'
+                          ? 'text-done/60 hover:opacity-60'
+                          : 'text-text-muted/50 hover:opacity-60 hover:text-text-muted'
                     }`}
                     title={`Set to ${STATUS_LABELS[status]}`}
                   >

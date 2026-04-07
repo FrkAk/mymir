@@ -39,7 +39,7 @@ export function TwoPanelLayout({
       {/* Desktop: side-by-side */}
       <div className="hidden lg:flex h-full">
         <div data-panel="navigator" className="w-2/5 min-h-0 overflow-y-auto">{left}</div>
-        <div className="w-px bg-gradient-to-b from-accent/20 via-accent/5 to-transparent" />
+        <div className="w-px bg-gradient-to-b from-border-strong via-border to-transparent" />
         <div data-panel="detail" className="w-3/5 overflow-hidden flex flex-col min-h-0">{right}</div>
       </div>
 
@@ -83,10 +83,10 @@ function ToggleTab({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 py-2.5 text-xs sm:text-sm font-medium transition-colors ${
+      className={`flex-1 py-2.5 text-xs sm:text-sm font-medium transition-opacity ${
         active
-          ? 'text-accent border-b-2 border-accent'
-          : 'text-text-muted hover:text-text-secondary'
+          ? 'text-text-primary border-b-2 border-accent'
+          : 'text-text-muted hover:opacity-60'
       }`}
     >
       {label}

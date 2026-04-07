@@ -12,7 +12,7 @@ interface ProgressBarProps {
 }
 
 const fillStyles = {
-  'in-progress': 'bg-gradient-to-r from-accent to-accent-light',
+  'in-progress': 'bg-accent',
   done: 'bg-done',
 } as const;
 
