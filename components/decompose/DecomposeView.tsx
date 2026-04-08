@@ -167,7 +167,7 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
           {/* Progress bar */}
           <div className="h-0.5 w-full bg-surface-raised">
             <motion.div
-              className={`h-full bg-gradient-to-r from-accent to-accent-light ${!isComplete ? 'progress-shimmer' : ''}`}
+              className={`h-full bg-gradient-to-r from-accent to-done ${!isComplete ? 'progress-shimmer' : ''}`}
               initial={{ width: '0%' }}
               animate={{
                 width: isComplete

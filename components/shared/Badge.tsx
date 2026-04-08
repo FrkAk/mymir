@@ -4,7 +4,7 @@ const statusStyles: Record<string, { dot: string; bg: string; text: string }> = 
   done: { dot: 'bg-done', bg: 'bg-done/15', text: 'text-done' },
   planned: { dot: 'bg-planned', bg: 'bg-planned/15', text: 'text-planned' },
   in_progress: { dot: 'bg-progress', bg: 'bg-progress/15', text: 'text-progress' },
-  draft: { dot: 'bg-draft', bg: 'bg-draft/12', text: 'text-draft' },
+  draft: { dot: 'bg-draft', bg: 'bg-draft/10', text: 'text-draft' },
   depends_on: { dot: 'bg-depends', bg: 'bg-depends/15', text: 'text-depends' },
   relates_to: { dot: 'bg-relates', bg: 'bg-relates/15', text: 'text-relates' },
 };

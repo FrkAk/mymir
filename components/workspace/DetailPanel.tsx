@@ -61,7 +61,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 /** Header gradient keyed to task status. */
 const STATUS_HEADER: Record<string, { gradient: string; border: string; badge: string }> = {
-  draft: { gradient: 'from-draft/10 via-draft/3 to-transparent', border: 'border-draft/20', badge: 'bg-draft/12 text-draft' },
+  draft: { gradient: 'from-draft/10 via-draft/3 to-transparent', border: 'border-draft/20', badge: 'bg-draft/10 text-draft' },
   planned: { gradient: 'from-planned/15 via-planned/4 to-transparent', border: 'border-planned/25', badge: 'bg-planned/15 text-planned' },
   in_progress: { gradient: 'from-progress/15 via-progress/4 to-transparent', border: 'border-progress/25', badge: 'bg-progress/15 text-progress' },
   done: { gradient: 'from-done/20 via-done/5 to-transparent', border: 'border-done/30', badge: 'bg-done/15 text-done' },
