@@ -1,5 +1,4 @@
-# Mymir
-
+![Mymir](assets/mymir-logo.png)
 > Context management for the agent-native engineering era.
 
 Most of us aren't really writing code anymore, we're directing agents that do. But those agents have no memory. Every session starts from zero, and engineers end up spending their time re-explaining what was built, why decisions were made, and what still needs to happen. That's not engineering, that's babysitting.
