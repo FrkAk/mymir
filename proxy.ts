@@ -47,17 +47,18 @@ export function proxy(request: NextRequest) {
   // Only auth endpoints and MCP routes are public — all other API
   // routes require a session cookie to prevent unauthenticated access.
   const isPublicPath =
-    pathname.startsWith("/sign-") ||
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/api/mymir/") ||
-    pathname.startsWith("/api/mcp") ||
+    pathname === "/api/mcp" ||
     pathname === "/api/test-connection";
   if (!session && !isPublicPath) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   // MCP API key auth (existing behavior preserved)
-  if (pathname.startsWith("/api/mymir/") || pathname.startsWith("/api/mcp")) {
+  if (pathname.startsWith("/api/mymir/") || pathname === "/api/mcp") {
     const authError = checkAuth(request);
     if (authError) return authError;
   }
@@ -75,5 +76,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|json|webmanifest)$).*)"],
 };
