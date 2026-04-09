@@ -291,7 +291,7 @@ export function DecomposeView({ projectId, initialTaskCount }: DecomposeViewProp
                       <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${taskStatusChip(task.status)}`}>
                         {taskStatusLabel(task.status)}
                       </span>
-                      {isPlannable(task) && (
+                      {graph && isPlannable(task, decomposeStatusMap, graph.edges) && (
                         <span className="rounded bg-planned/15 px-1 py-px font-mono text-[9px] font-semibold text-planned">
                           plannable
                         </span>

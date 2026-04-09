@@ -145,7 +145,7 @@ export function StructureView({
       filtered = filtered
         .map(([cat, groupTasks]) => [cat, groupTasks.filter((t) => {
           if (activeStatusFilters.has(t.status)) return true;
-          if (activeStatusFilters.has('plannable') && isPlannable(t)) return true;
+          if (activeStatusFilters.has('plannable') && isPlannable(t, statusMap, edges)) return true;
           if (activeStatusFilters.has('ready') && isReady(t, statusMap, edges)) return true;
           return false;
         })] as [string, Task[]])
@@ -285,7 +285,7 @@ export function StructureView({
   const totalTasks = tasks.length;
   const doneTasks = tasks.filter((t) => t.status === 'done').length;
   const inProgressTasks = tasks.filter((t) => t.status === 'in_progress').length;
-  const plannableTasks = tasks.filter((t) => isPlannable(t)).length;
+  const plannableTasks = tasks.filter((t) => isPlannable(t, statusMap, edges)).length;
   const readyTasks = tasks.filter((t) => isReady(t, statusMap, edges)).length;
   const progressPct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
@@ -845,7 +845,7 @@ export function StructureView({
                             <span className={`font-mono text-[10px] font-semibold uppercase tracking-wider ${statusChipText(task.status)}`}>
                               {statusLabel(task.status)}
                             </span>
-                            {isPlannable(task) && (
+                            {isPlannable(task, statusMap, edges) && (
                               <span className="rounded bg-planned/15 px-1 py-px font-mono text-[9px] font-semibold text-planned">
                                 plannable
                               </span>
