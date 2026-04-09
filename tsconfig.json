@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2024",
     "lib": [
       "dom",
       "dom.iterable",
@@ -10,7 +10,6 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
-    "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -26,7 +25,8 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "esModuleInterop": true
   },
   "include": [
     "next-env.d.ts",
