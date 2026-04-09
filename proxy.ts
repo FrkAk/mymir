@@ -43,9 +43,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Protected app pages: redirect to sign-in if not authenticated
+  // Protected app pages: redirect to sign-in if not authenticated.
+  // Only auth endpoints and MCP routes are public — all other API
+  // routes require a session cookie to prevent unauthenticated access.
   const isPublicPath =
-    pathname.startsWith("/sign-") || pathname.startsWith("/api/");
+    pathname.startsWith("/sign-") ||
+    pathname.startsWith("/api/auth/") ||
+    pathname.startsWith("/api/mymir/") ||
+    pathname.startsWith("/api/mcp") ||
+    pathname === "/api/test-connection";
   if (!session && !isPublicPath) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }

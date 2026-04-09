@@ -4,15 +4,16 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { ac, owner, admin, member } from "@/lib/auth/permissions";
+import * as authSchema from "@/lib/db/auth-schema";
 
 /**
- * Separate postgres connection scoped to the neon_auth schema.
- * Keeps auth tables isolated from the app's public schema.
+ * Auth DB connection. Uses the same DATABASE_URL as the app.
+ * Table names are schema-qualified via pgSchema("neon_auth") in
+ * auth-schema.ts, so no search_path override is needed.
+ * This works correctly with Neon's connection pooler (PgBouncer).
  */
-const authSql = postgres(process.env.DATABASE_URL!, {
-  connection: { search_path: "neon_auth" },
-});
-const authDb = drizzle(authSql);
+const authSql = postgres(process.env.DATABASE_URL!);
+const authDb = drizzle(authSql, { schema: authSchema });
 
 /**
  * Better Auth server instance.
@@ -20,9 +21,17 @@ const authDb = drizzle(authSql);
  * Provides email/password auth and organization-based team management.
  */
 export const auth = betterAuth({
-  database: drizzleAdapter(authDb, { provider: "pg" }),
+  database: drizzleAdapter(authDb, {
+    provider: "pg",
+    schema: authSchema,
+  }),
   secret: process.env.BETTER_AUTH_SECRET,
   emailAndPassword: { enabled: true },
+  advanced: {
+    database: {
+      generateId: false,
+    },
+  },
   plugins: [
     organization({
       ac,
