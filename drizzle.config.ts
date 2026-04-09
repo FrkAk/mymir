@@ -17,8 +17,9 @@ if (existsSync(envPath)) {
 
 export default defineConfig({
   out: "./drizzle",
-  schema: "./lib/db/schema.ts",
+  schema: ["./lib/db/schema.ts"],
   dialect: "postgresql",
+  schemaFilter: ["public", "neon_auth"],
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },

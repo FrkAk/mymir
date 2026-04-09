@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/layout/ThemeProvider';
+import { signOut } from '@/lib/auth-client';
 
 interface TopBarProps {
   /** @param projectName - Optional breadcrumb project name. */
@@ -19,10 +21,17 @@ interface TopBarProps {
  */
 export function TopBar({ projectName, stageLabel, taskStats }: TopBarProps) {
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
 
   /** Toggle between light and dark theme and persist the choice. */
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  /** Sign out and redirect to sign-in page. */
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/sign-in');
   };
 
   return (
@@ -65,6 +74,15 @@ export function TopBar({ projectName, stageLabel, taskStats }: TopBarProps) {
                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
               </svg>
             )}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="cursor-pointer rounded-md p-2.5 sm:p-1.5 text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
+            title="Sign out"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h5a1 1 0 100-2H4V5h4a1 1 0 100-2H3zm10.293 3.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L14.586 11H7a1 1 0 110-2h7.586l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
           </button>
           <Link href="/settings" className="rounded-md p-2.5 sm:p-1.5 text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary">
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
