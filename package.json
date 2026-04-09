@@ -28,6 +28,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@types/d3-quadtree": "^3.0.6",
     "ai": "^6.0.141",
+    "better-auth": "^1.6.1",
     "d3-force": "^3.0.0",
     "d3-quadtree": "^3.0.1",
     "drizzle-orm": "^0.45.2",

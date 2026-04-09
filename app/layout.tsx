@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { MotionProvider } from "@/components/layout/MotionProvider";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -41,7 +42,9 @@ export default async function RootLayout({
       </head>
       <body>
         <ThemeProvider initialTheme={theme}>
-          <MotionProvider>{children}</MotionProvider>
+          <SessionProvider>
+            <MotionProvider>{children}</MotionProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
