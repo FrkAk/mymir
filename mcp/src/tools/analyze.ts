@@ -2,7 +2,14 @@ import { z } from "zod/v4";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DESCRIPTIONS, handleAnalyze } from "@/lib/ai/tool-handlers";
 import { resolveProjectId } from "../state.js";
-import { json, error } from "./helpers.js";
+import { text, error } from "./helpers.js";
+import {
+  formatReadyTasks,
+  formatBlockedTasks,
+  formatDownstream,
+  formatCriticalPath,
+  formatPlannableTasks,
+} from "./formatters.js";
 
 /**
  * Register the mymir_analyze tool on the MCP server.
@@ -33,7 +40,17 @@ export function registerAnalyzeTool(server: McpServer): void {
       try {
         const pid = type !== "downstream" ? resolveProjectId(projectId) : projectId;
         const result = await handleAnalyze({ type, taskId, projectId: pid });
-        return result.ok ? json(result.data) : error(result.error);
+        if (!result.ok) return error(result.error);
+
+        const formatters = {
+          ready: formatReadyTasks,
+          blocked: formatBlockedTasks,
+          downstream: formatDownstream,
+          critical_path: formatCriticalPath,
+          plannable: formatPlannableTasks,
+        } as const;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return text((formatters[type] as any)(result.data));
       } catch (e) {
         return error(e instanceof Error ? e.message : String(e));
       }

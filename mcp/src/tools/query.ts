@@ -2,7 +2,13 @@ import { z } from "zod/v4";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DESCRIPTIONS, handleQuery } from "@/lib/ai/tool-handlers";
 import { resolveProjectId } from "../state.js";
-import { json, error } from "./helpers.js";
+import { text, error } from "./helpers.js";
+import {
+  formatSearchResults,
+  formatTaskList,
+  formatEdges,
+  formatOverview,
+} from "./formatters.js";
 
 /**
  * Register the mymir_query tool on the MCP server.
@@ -35,7 +41,16 @@ export function registerQueryTool(server: McpServer): void {
       try {
         const pid = type !== "edges" ? resolveProjectId(projectId) : projectId;
         const result = await handleQuery({ type, query, taskId, projectId: pid });
-        return result.ok ? json(result.data) : error(result.error);
+        if (!result.ok) return error(result.error);
+
+        const formatters = {
+          search: formatSearchResults,
+          list: formatTaskList,
+          edges: formatEdges,
+          overview: formatOverview,
+        } as const;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return text((formatters[type] as any)(result.data));
       } catch (e) {
         return error(e instanceof Error ? e.message : String(e));
       }
