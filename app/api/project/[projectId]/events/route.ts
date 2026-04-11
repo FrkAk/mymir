@@ -1,6 +1,7 @@
 import { dbEvents } from '@/lib/events';
 import { getSession } from '@/lib/auth/session';
 import { error } from '@/lib/api/response';
+import { acquireSSESlot, releaseSSESlot } from '@/lib/api/sse-limiter';
 
 /**
  * SSE endpoint — streams DB change notifications to the browser.
@@ -12,6 +13,17 @@ export async function GET(
 ) {
   const session = await getSession();
   if (!session) return error("Unauthorized", 401);
+
+  const userId = session.user.id;
+  if (!acquireSSESlot(userId)) {
+    return new Response(
+      JSON.stringify({ error: "Too many concurrent connections" }),
+      {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": "5" },
+      },
+    );
+  }
 
   const { projectId } = await params;
 
@@ -38,6 +50,9 @@ export async function GET(
         clearInterval(heartbeat);
         controller.close();
       });
+    },
+    cancel() {
+      releaseSSESlot(userId);
     },
   });
 
