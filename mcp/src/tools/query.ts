@@ -1,6 +1,7 @@
 import { z } from "zod/v4";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DESCRIPTIONS, handleQuery } from "@/lib/ai/tool-handlers";
+import type { SearchResult, TaskSlim, DetailedEdge, ProjectOverview } from "@/lib/ai/tool-handlers";
 import { resolveProjectId } from "../state.js";
 import { text, error } from "./helpers.js";
 import {
@@ -43,14 +44,18 @@ export function registerQueryTool(server: McpServer): void {
         const result = await handleQuery({ type, query, taskId, projectId: pid });
         if (!result.ok) return error(result.error);
 
-        const formatters = {
-          search: formatSearchResults,
-          list: formatTaskList,
-          edges: formatEdges,
-          overview: formatOverview,
-        } as const;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return text((formatters[type] as any)(result.data));
+        switch (type) {
+          case "search": {
+            const { results, _hints } = result.data as { results: SearchResult[]; _hints?: string[] };
+            return text(formatSearchResults(results, _hints));
+          }
+          case "list":
+            return text(formatTaskList(result.data as TaskSlim[]));
+          case "edges":
+            return text(formatEdges(result.data as DetailedEdge[]));
+          case "overview":
+            return text(formatOverview(result.data as ProjectOverview));
+        }
       } catch (e) {
         return error(e instanceof Error ? e.message : String(e));
       }

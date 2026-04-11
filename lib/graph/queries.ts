@@ -77,11 +77,21 @@ export async function getProjectTasks(projectId: string) {
     .orderBy(asc(tasks.order));
 }
 
+/** Slim task representation for project listings. */
+export type TaskSlim = {
+  id: string;
+  title: string;
+  status: string;
+  tags: string[];
+  category: string | null;
+  order: number;
+};
+
 /**
  * Fetch slim task list for a project (id, title, status, tags, order only).
  * Used by mymir_query type='list' to keep MCP responses small.
  */
-export async function getProjectTasksSlim(projectId: string) {
+export async function getProjectTasksSlim(projectId: string): Promise<TaskSlim[]> {
   return db
     .select({
       id: tasks.id,
@@ -350,7 +360,7 @@ export async function searchTasks(
 // ---------------------------------------------------------------------------
 
 /** An edge with full connected task details. */
-type DetailedEdge = {
+export type DetailedEdge = {
   edgeId: string;
   edgeType: EdgeType;
   direction: "outgoing" | "incoming";

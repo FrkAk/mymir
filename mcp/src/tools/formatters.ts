@@ -3,28 +3,25 @@
  * These run in the MCP layer only — the web app uses the raw objects.
  */
 
-// ---------------------------------------------------------------------------
-// Context: summary
-// ---------------------------------------------------------------------------
+import type {
+  SummaryContext,
+  SearchResult,
+  TaskSlim,
+  DetailedEdge,
+  ProjectOverview,
+  ReadyTask,
+  PlannableTask,
+  BlockedTask,
+  DownstreamNode,
+  CriticalPathTask,
+} from "@/lib/ai/tool-handlers";
 
-type SummaryData = {
-  node: { title: string; status: string; description: string };
-  parent: { title: string; type: string } | null;
-  edgeCount: Record<string, number>;
-  edges: {
-    edgeType: string;
-    direction: string;
-    connectedTaskId: string;
-    connectedTaskTitle: string;
-    connectedTaskStatus: string;
-    note: string;
-  }[];
-  acceptanceCriteriaCount: number;
-  decisionsCount: number;
-  hasImplementationPlan: boolean;
-};
-
-export function formatSummary(data: SummaryData): string {
+/**
+ * Format a task summary context as compact markdown.
+ * @param data - Summary context from buildSummaryContext.
+ * @returns Formatted markdown string with task info, stats, and edges.
+ */
+export function formatSummary(data: SummaryContext): string {
   const { node, parent, edgeCount, edges, acceptanceCriteriaCount, decisionsCount, hasImplementationPlan } = data;
   const lines: string[] = [];
 
@@ -43,8 +40,8 @@ export function formatSummary(data: SummaryData): string {
   if (edges.length > 0) {
     lines.push("\n## Edges");
     for (const e of edges) {
-      const arrow = e.direction === "outgoing" ? "→" : "←";
-      const note = e.note ? ` — "${e.note}"` : "";
+      const arrow = e.direction === "outgoing" ? "\u2192" : "\u2190";
+      const note = e.note ? ` \u2014 "${e.note}"` : "";
       lines.push(`- ${e.edgeType} ${arrow} ${e.connectedTaskTitle} [${e.connectedTaskStatus}]${note}`);
     }
   }
@@ -52,26 +49,13 @@ export function formatSummary(data: SummaryData): string {
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Query: search
-// ---------------------------------------------------------------------------
-
-type SearchResult = {
-  id: string;
-  title: string;
-  status: string;
-  state: string;
-  tags: string[];
-  category: string | null;
-};
-
-type SearchData = {
-  results: SearchResult[];
-  _hints?: string[];
-};
-
-export function formatSearchResults(data: SearchData): string {
-  const { results, _hints } = data;
+/**
+ * Format search results as a bulleted list.
+ * @param results - Matching tasks.
+ * @param hints - Optional contextual hints to append.
+ * @returns Formatted markdown string with matching tasks.
+ */
+export function formatSearchResults(results: SearchResult[], hints: string[] = []): string {
   if (results.length === 0) return "No results found.";
 
   const lines: string[] = [`Found ${results.length} result${results.length > 1 ? "s" : ""}:\n`];
@@ -82,27 +66,19 @@ export function formatSearchResults(data: SearchData): string {
     lines.push(`- ${r.title} [${r.status}] \`${r.id}\`${tags}${cat} (state: ${r.state})`);
   }
 
-  if (_hints && _hints.length > 0) {
+  if (hints.length > 0) {
     lines.push("");
-    for (const h of _hints) lines.push(`_${h}_`);
+    for (const h of hints) lines.push(`_${h}_`);
   }
 
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Query: list
-// ---------------------------------------------------------------------------
-
-type TaskSlim = {
-  id: string;
-  title: string;
-  status: string;
-  tags: string[];
-  category: string | null;
-  order: number;
-};
-
+/**
+ * Format a slim task list as a numbered list.
+ * @param data - Array of slim task objects.
+ * @returns Formatted markdown string with all tasks.
+ */
 export function formatTaskList(data: TaskSlim[]): string {
   if (data.length === 0) return "No tasks.";
 
@@ -116,62 +92,29 @@ export function formatTaskList(data: TaskSlim[]): string {
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Query: edges
-// ---------------------------------------------------------------------------
-
-type EdgeDetailed = {
-  edgeId: string;
-  edgeType: string;
-  direction: string;
-  note: string;
-  connectedTask: { id: string; title: string; status: string };
-};
-
-export function formatEdges(data: EdgeDetailed[]): string {
+/**
+ * Format detailed edges as a bulleted list.
+ * @param data - Array of detailed edge objects.
+ * @returns Formatted markdown string with edge details.
+ */
+export function formatEdges(data: DetailedEdge[]): string {
   if (data.length === 0) return "No edges.";
 
   const lines: string[] = [`# Edges (${data.length})\n`];
   for (const e of data) {
-    const arrow = e.direction === "outgoing" ? "→" : "←";
-    const note = e.note ? ` — "${e.note}"` : "";
+    const arrow = e.direction === "outgoing" ? "\u2192" : "\u2190";
+    const note = e.note ? ` \u2014 "${e.note}"` : "";
     lines.push(`- ${e.edgeType} ${arrow} ${e.connectedTask.title} [${e.connectedTask.status}] \`${e.edgeId}\`${note}`);
   }
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Query: overview
-// ---------------------------------------------------------------------------
-
-type OverviewData = {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  categories: string[];
-  tasks: {
-    id: string;
-    title: string;
-    status: string;
-    description: string;
-    order: number;
-    tags: string[];
-    category: string | null;
-  }[];
-  edges: {
-    sourceTitle: string;
-    targetTitle: string;
-    edgeType: string;
-    note: string;
-  }[];
-  totalTasks: number;
-  doneTasks: number;
-  inProgressTasks: number;
-  progress: number;
-};
-
-export function formatOverview(data: OverviewData): string {
+/**
+ * Format a full project overview with tasks, edges, and progress stats.
+ * @param data - Project overview object.
+ * @returns Formatted markdown string with project structure.
+ */
+export function formatOverview(data: ProjectOverview): string {
   const lines: string[] = [];
 
   lines.push(`# ${data.title} [${data.status}]`);
@@ -195,7 +138,7 @@ export function formatOverview(data: OverviewData): string {
   if (data.edges.length > 0) {
     lines.push("\n## Edges");
     for (const e of data.edges) {
-      const note = e.note ? ` — "${e.note}"` : "";
+      const note = e.note ? ` \u2014 "${e.note}"` : "";
       lines.push(`- ${e.sourceTitle} --${e.edgeType}--> ${e.targetTitle}${note}`);
     }
   }
@@ -203,41 +146,34 @@ export function formatOverview(data: OverviewData): string {
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Analyze: ready / plannable
-// ---------------------------------------------------------------------------
-
-type TaggedTask = {
-  id: string;
-  title: string;
-  status: string;
-  tags: string[];
-};
-
-type TaggedTaskData = TaggedTask[] | { tasks: TaggedTask[]; _hints?: string[] };
-
-function extractTaggedTasks(data: TaggedTaskData): { tasks: TaggedTask[]; hints: string[] } {
-  if (Array.isArray(data)) return { tasks: data, hints: [] };
-  return { tasks: data.tasks, hints: data._hints ?? [] };
+/**
+ * Format ready (unblocked) tasks as a bulleted list.
+ * @param tasks - Array of ready tasks.
+ * @param hints - Optional contextual hints to append.
+ * @returns Formatted markdown string with ready tasks.
+ */
+export function formatReadyTasks(tasks: ReadyTask[], hints: string[] = []): string {
+  return formatTasksWithHints("Ready Tasks", tasks, hints);
 }
 
-export function formatReadyTasks(data: TaggedTaskData): string {
-  const { tasks, hints } = extractTaggedTasks(data);
-  return formatTaggedTaskList("Ready Tasks", tasks, hints);
+/**
+ * Format plannable (draft) tasks as a bulleted list.
+ * @param tasks - Array of plannable tasks.
+ * @param hints - Optional contextual hints to append.
+ * @returns Formatted markdown string with plannable tasks.
+ */
+export function formatPlannableTasks(tasks: PlannableTask[], hints: string[] = []): string {
+  return formatTasksWithHints("Plannable Tasks", tasks, hints);
 }
 
-export function formatPlannableTasks(data: TaggedTaskData): string {
-  const { tasks, hints } = extractTaggedTasks(data);
-  return formatTaggedTaskList("Plannable Tasks", tasks, hints);
-}
-
-function formatTaggedTaskList(heading: string, tasks: TaggedTask[], hints: string[]): string {
-  const lines: string[] = [`# ${heading} (${tasks.length})\n`];
-
-  if (tasks.length === 0 && hints.length > 0) {
-    for (const h of hints) lines.push(`_${h}_`);
-    return lines.join("\n");
+function formatTasksWithHints(heading: string, tasks: ReadyTask[], hints: string[]): string {
+  if (tasks.length === 0) {
+    const base = `No ${heading.toLowerCase()}.`;
+    if (hints.length === 0) return base;
+    return base + "\n\n" + hints.map((h) => `_${h}_`).join("\n");
   }
+
+  const lines: string[] = [`# ${heading} (${tasks.length})\n`];
 
   for (const t of tasks) {
     const tags = t.tags.length > 0 ? ` tags: ${t.tags.join(", ")}` : "";
@@ -252,19 +188,13 @@ function formatTaggedTaskList(heading: string, tasks: TaggedTask[], hints: strin
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Analyze: blocked
-// ---------------------------------------------------------------------------
-
-type BlockedTask = {
-  id: string;
-  title: string;
-  status: string;
-  blockedBy: { id: string; title: string; status: string }[];
-};
-
+/**
+ * Format blocked tasks with their blocker details.
+ * @param data - Array of blocked task objects with blockedBy info.
+ * @returns Formatted markdown string with blocked tasks and blockers.
+ */
 export function formatBlockedTasks(data: BlockedTask[]): string {
-  if (data.length === 0) return "# Blocked Tasks (0)\n\nNo blocked tasks.";
+  if (data.length === 0) return "No blocked tasks.";
 
   const lines: string[] = [`# Blocked Tasks (${data.length})\n`];
   for (const t of data) {
@@ -275,14 +205,13 @@ export function formatBlockedTasks(data: BlockedTask[]): string {
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Analyze: downstream
-// ---------------------------------------------------------------------------
-
-type DownstreamNode = { id: string; depth: number };
-
+/**
+ * Format downstream (impacted) tasks as a bulleted list.
+ * @param data - Array of downstream nodes with depth.
+ * @returns Formatted markdown string with downstream tasks.
+ */
 export function formatDownstream(data: DownstreamNode[]): string {
-  if (data.length === 0) return "# Downstream Tasks (0)\n\nNo downstream tasks.";
+  if (data.length === 0) return "No downstream tasks.";
 
   const lines: string[] = [`# Downstream Tasks (${data.length})\n`];
   for (const d of data) {
@@ -291,14 +220,13 @@ export function formatDownstream(data: DownstreamNode[]): string {
   return lines.join("\n");
 }
 
-// ---------------------------------------------------------------------------
-// Analyze: critical_path
-// ---------------------------------------------------------------------------
-
-type CriticalPathTask = { id: string; title: string; status: string };
-
+/**
+ * Format the critical path (longest dependency chain) as a numbered list.
+ * @param data - Ordered array of tasks forming the critical path.
+ * @returns Formatted markdown string with the critical path.
+ */
 export function formatCriticalPath(data: CriticalPathTask[]): string {
-  if (data.length === 0) return "# Critical Path (0 tasks)\n\nNo dependency chains found.";
+  if (data.length === 0) return "No dependency chains found.";
 
   const lines: string[] = [`# Critical Path (${data.length} tasks)\n`];
   for (let i = 0; i < data.length; i++) {
