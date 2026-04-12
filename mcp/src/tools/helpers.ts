@@ -8,6 +8,15 @@ export function json(data: unknown) {
 }
 
 /**
+ * Format a plain text response for MCP tool output.
+ * @param str - Pre-formatted text string.
+ * @returns MCP content response.
+ */
+export function text(str: string) {
+  return { content: [{ type: "text" as const, text: str }] };
+}
+
+/**
  * Format an error response with recovery guidance.
  * @param message - Actionable error message.
  * @returns MCP error response.

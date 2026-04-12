@@ -2,7 +2,8 @@ import { z } from "zod/v4";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DESCRIPTIONS, handleContext } from "@/lib/ai/tool-handlers";
 import { resolveProjectId } from "../state.js";
-import { json, error } from "./helpers.js";
+import { text, error } from "./helpers.js";
+import { formatSummary } from "./formatters.js";
 
 /**
  * Register the mymir_context tool on the MCP server.
@@ -33,11 +34,11 @@ export function registerContextTool(server: McpServer): void {
         const pid = depth === "working" ? resolveProjectId(projectId) : projectId;
         const result = await handleContext({ taskId, depth, projectId: pid });
         if (!result.ok) return error(result.error);
-        // Text depths return pre-formatted strings; summary returns JSON
+        // Text depths return pre-formatted strings; summary gets formatted here
         if (typeof result.data === "string") {
-          return { content: [{ type: "text" as const, text: result.data }] };
+          return text(result.data);
         }
-        return json(result.data);
+        return text(formatSummary(result.data as Parameters<typeof formatSummary>[0]));
       } catch (e) {
         return error(e instanceof Error ? e.message : String(e));
       }

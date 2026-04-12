@@ -39,6 +39,16 @@ import {
   getCriticalPath,
   getPlannableTasks,
 } from "@/lib/graph/traversal";
+export type {
+  ReadyTask,
+  BlockedTask,
+  DownstreamNode,
+  CriticalPathTask,
+  PlannableTask,
+} from "@/lib/graph/traversal";
+export type { SearchResult, DetailedEdge, TaskSlim } from "@/lib/graph/queries";
+export type { ProjectOverview } from "@/lib/context/overview";
+export type { SummaryContext } from "@/lib/context/summary";
 import type { EdgeType, Decision } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
