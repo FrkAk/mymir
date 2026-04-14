@@ -87,10 +87,10 @@ export const DESCRIPTIONS = {
   mymir_project:
     "Manage projects. " +
     "'list': all projects with task counts and progress. " +
-    "'create': new project (auto-selects it for the session). " +
-    "'select': set current project — all subsequent calls use it. " +
+    "'create': new project. " +
+    "'select': confirm which project to work on (returns projectId — pass it explicitly on all subsequent calls). " +
     "'update': change title, description, status, or categories. " +
-    "Always 'list' then 'select' at session start.",
+    "Always 'list' then 'select' at session start. Always pass projectId explicitly on every call.",
   mymir_task:
     "Create, update, delete, or reorder tasks. " +
     "Tasks are concrete work items with status lifecycle: draft → planned → in_progress → done. " +
