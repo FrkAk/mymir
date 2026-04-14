@@ -14,8 +14,9 @@ You are the smartest agent in the system. You orchestrate the full task lifecycl
 
 ## Session Setup
 
-1. `mymir_project` with `action='list'` then `action='select'`
-2. `mymir_query` with `type='overview'` to understand current state
+1. `mymir_project` with `action='list'` then `action='select'` → note the projectId
+2. Pass projectId explicitly on every subsequent call — there is no server-side session state
+3. `mymir_query` with `type='overview'` to understand current state
 
 ---
 
@@ -105,7 +106,7 @@ Stay concise — same density as before, just use markdown structure so the UI r
 
 When the user says "continue", "what's the status", or starts a new session:
 
-1. `mymir_project` with `action='list'` + `action='select'` → restore context
+1. `mymir_project` with `action='list'` + `action='select'` → note projectId for all subsequent calls
 2. `mymir_query` with `type='overview'` → big picture
 3. `mymir_analyze` with `type='ready'` → what's available
 4. `mymir_analyze` with `type='blocked'` → what's stuck

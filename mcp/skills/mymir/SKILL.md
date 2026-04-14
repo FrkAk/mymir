@@ -20,8 +20,8 @@ Invokable as `/mymir`. You have access to 6 Mymir MCP tools (prefixed `mymir_`) 
 ## First Use in Session
 
 1. `mymir_project` with `action='list'` → see existing projects
-2. `mymir_project` with `action='select'` → set current project (`create` auto-selects)
-3. Then use other tools as needed
+2. `mymir_project` with `action='select'` → confirm working project (note the projectId — pass it explicitly on every call)
+3. Then use other tools as needed, always passing projectId explicitly
 
 ## Data Model
 
@@ -142,7 +142,7 @@ Stay concise — same density as before, just use markdown structure so the UI r
 6. Report what was unlocked: `mymir_analyze type='ready'`
 
 ### Continue / Resume
-1. `mymir_project` `action='list'` + `action='select'` → restore context
+1. `mymir_project` `action='list'` + `action='select'` → note projectId for all subsequent calls
 2. `mymir_query` `type='overview'` → big picture
 3. `mymir_analyze` `type='ready'` → what's available
 4. `mymir_analyze` `type='blocked'` → what's stuck
