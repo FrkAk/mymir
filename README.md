@@ -116,25 +116,25 @@ bun run dev
 
 ### Claude Code plugin
 
-To use Mymir from the terminal, install the Claude Code plugin:
-
-```text
-mcp/
-├── .claude-plugin/plugin.json   # Plugin manifest
-├── .mcp.json                    # MCP server config (stdio > PostgreSQL)
-├── agents/                      # brainstorm, decompose, manage
-├── skills/mymir/SKILL.md        # Auto-invocation trigger
-└── src/                         # MCP server (6 tools)
-```
-
-Install and load the plugin:
+Make sure the dev server is running, then install the plugin globally:
 
 ```bash
-cd mcp && bun install
-claude --plugin-dir ./mcp
+claude mcp add --transport http -s user mymir http://localhost:3000/api/mcp
+claude plugin marketplace add ./mcp
+claude plugin install mymir@mymir-local
 ```
 
-Once loaded, Claude has access to:
+This is a one-time setup. Mymir will be available in every Claude Code session.
+
+To update the plugin after pulling changes:
+
+```bash
+claude plugin update mymir@mymir-local
+```
+
+Then restart Claude Code. MCP server changes (`lib/mcp/`) take effect immediately, no update needed.
+
+Once installed, Claude has access to:
 
 | Component | What it does |
 | --- | --- |

@@ -12,8 +12,8 @@ Your output directly feeds the decompose agent. If you produce vague answers, ev
 ## Session Setup
 
 1. `mymir_project` with `action='list'` — check for existing projects
-2. If none relevant: `mymir_project` with `action='create'` + working title (auto-selects)
-3. If exists: `mymir_project` with `action='select'`
+2. If none relevant: `mymir_project` with `action='create'` + working title → note the returned projectId
+3. If exists: `mymir_project` with `action='select'` → note the projectId for all subsequent calls
 
 ## What You Need to Cover
 
