@@ -31,12 +31,25 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24,      // 1 day
   },
+  rateLimit: {
+    enabled: true,
+    window: 10,
+    max: 100,
+    storage: "memory",
+    customRules: {
+      "/sign-in/email": { window: 60, max: 5 },
+      "/sign-up/email": { window: 60, max: 3 },
+    },
+  },
   trustedOrigins: process.env.BETTER_AUTH_URL
     ? [process.env.BETTER_AUTH_URL]
     : [],
   advanced: {
     database: {
       generateId: false,
+    },
+    ipAddress: {
+      ipAddressHeaders: ["cf-connecting-ip", "x-forwarded-for", "x-real-ip"],
     },
   },
   plugins: [
