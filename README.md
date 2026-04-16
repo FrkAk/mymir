@@ -144,6 +144,33 @@ Once installed, Claude has access to:
 | **Manage agent** | Navigate, refine, track progress, restructure |
 | **Mymir skill** | Auto-invokes when conversation matches project planning |
 
+### Gemini CLI
+
+Make sure the dev server is running, then add Mymir to `~/.gemini/settings.json` (user-scope) or `.gemini/settings.json` (project-scope):
+
+```json
+{
+  "mcpServers": {
+    "mymir": {
+      "url": "http://localhost:3000/api/mcp"
+    }
+  }
+}
+```
+
+Then start Gemini and run `/mcp auth mymir` to complete the OAuth flow. A browser window will open for sign-in. Tokens are stored automatically for future sessions.
+
+### Codex CLI
+
+Add this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.mymir]
+url = "http://localhost:3000/api/mcp"
+```
+
+Make sure the dev server is running before starting a Codex session. On first use, Mymir will return an authorization URL — open it in your browser to complete the OAuth flow.
+
 ---
 
 ## How is it going
