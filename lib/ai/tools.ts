@@ -1,7 +1,7 @@
 /**
  * AI SDK tool definitions for the Mymir web app.
  * 6 consolidated tools matching MCP design. Each scope function restricts
- * which actions are available via narrowed Zod enums.
+ * which actions are available via narrowed discriminated-union branches.
  */
 
 import { z } from "zod/v4";
@@ -16,6 +16,29 @@ import {
   handleAnalyze,
   type ToolResult,
 } from "./tool-handlers";
+import {
+  projectUpdate,
+  taskCreate,
+  taskUpdate,
+  taskDelete,
+  taskReorder,
+  edgeCreate,
+  edgeUpdate,
+  edgeRemove,
+  querySearch,
+  queryList,
+  queryEdges,
+  queryOverview,
+  contextSummary,
+  contextWorking,
+  contextAgent,
+  contextPlanning,
+  analyzeReady,
+  analyzeBlocked,
+  analyzeDownstream,
+  analyzeCriticalPath,
+  analyzePlannable,
+} from "@/lib/api/mcp-schemas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -33,35 +56,6 @@ function unwrap(result: ToolResult): unknown {
 }
 
 // ---------------------------------------------------------------------------
-// Shared Zod field schemas (reused across scopes)
-// ---------------------------------------------------------------------------
-
-const taskFields = {
-  taskId: z.string().uuid().optional().describe("Task UUID. Required for update/delete/reorder"),
-  title: z.string().optional().describe("Short task name. Required for create"),
-  description: z.string().optional().describe("2-4 sentences: what to build, why it matters, key technical approach. Required for create"),
-  status: z.enum(["draft", "planned", "in_progress", "done"]).optional().describe("Task lifecycle status"),
-  acceptanceCriteria: z.array(z.string()).optional().describe("2-4 testable done conditions"),
-  decisions: z.array(z.string()).optional().describe("Key technical decisions and constraints"),
-  tags: z.array(z.string()).optional().describe("Tags for filtering (e.g. ['auth', 'backend'])"),
-  category: z.string().optional().describe("Drawer group for this task. Should match a project category."),
-  files: z.array(z.string()).optional().describe("File paths this task touches"),
-  implementationPlan: z.string().optional().describe("Implementation plan written during planning phase"),
-  executionRecord: z.string().optional().describe("Summary of what was built during implementation"),
-  order: z.number().int().optional().describe("0-based position"),
-  preview: z.boolean().optional().default(true).describe("For delete only: true=show impact (default), false=actually delete"),
-  overwriteArrays: z.boolean().optional().default(false).describe("For update only: true=replace decisions/acceptanceCriteria/files entirely. Default false=append to existing"),
-};
-
-const edgeFields = {
-  edgeId: z.string().optional().describe("Edge UUID. Required for update. For remove: use this OR source+target+type"),
-  sourceTaskId: z.string().optional().describe("Source task UUID. Required for create"),
-  targetTaskId: z.string().optional().describe("Target task UUID. Required for create"),
-  edgeType: z.enum(["depends_on", "relates_to"]).optional().describe("depends_on = source needs target done first. relates_to = informational link"),
-  note: z.string().optional().describe("Why this relationship exists"),
-};
-
-// ---------------------------------------------------------------------------
 // Brainstorm scope
 // ---------------------------------------------------------------------------
 
@@ -76,13 +70,7 @@ export function brainstormTools(projectId: string) {
       description:
         "Update the project's name and description after brainstorming is complete. " +
         "Description should be 3-5 sentences covering: problem, target user, core features, tech direction, constraints.",
-      inputSchema: z.object({
-        action: z.literal("update").describe("Only 'update' is available in brainstorm scope"),
-        title: z.string().optional().describe("Short project name (2-5 words)"),
-        description: z.string().optional().describe("3-5 sentence comprehensive brief"),
-        status: z.enum(["brainstorming", "decomposing", "active", "archived"]).optional().describe("Project lifecycle status"),
-        categories: z.array(z.string()).optional().describe("Task categories for drawer grouping (e.g. ['backend', 'frontend'])"),
-      }),
+      inputSchema: projectUpdate.omit({ projectId: true }),
       execute: async (params) =>
         unwrap(await handleProject({ ...params, projectId })),
     }),
@@ -112,38 +100,33 @@ export function decomposeTools(projectId: string) {
   return {
     mymir_task: tool({
       description: DESCRIPTIONS.mymir_task,
-      inputSchema: z.object({
-        action: z.enum(["create", "update"]).describe("create=new task, update=modify fields"),
-        ...taskFields,
-      }),
+      inputSchema: z.discriminatedUnion("action", [
+        taskCreate.omit({ projectId: true }),
+        taskUpdate,
+      ]),
       execute: async (params) =>
-        unwrap(await handleTask({ ...params, projectId })),
+        unwrap(
+          await handleTask(
+            params.action === "create" ? { ...params, projectId } : params,
+          ),
+        ),
     }),
     mymir_edge: tool({
       description: DESCRIPTIONS.mymir_edge,
-      inputSchema: z.object({
-        action: z.enum(["create", "update"]).describe("create=new edge, update=modify"),
-        ...edgeFields,
-      }),
-      execute: async (params) =>
-        unwrap(await handleEdge(params)),
+      inputSchema: z.discriminatedUnion("action", [edgeCreate, edgeUpdate]),
+      execute: async (params) => unwrap(await handleEdge(params)),
     }),
     mymir_query: tool({
       description: DESCRIPTIONS.mymir_query,
-      inputSchema: z.object({
-        type: z.enum(["search", "overview"]).describe("search=find by name or tag, overview=project structure"),
-        query: z.string().optional().describe("Search string for type='search'"),
-        taskId: z.string().optional().describe("Task UUID for type='edges'"),
-      }),
-      execute: async (params) =>
-        unwrap(await handleQuery({ ...params, projectId })),
+      inputSchema: z.discriminatedUnion("type", [
+        querySearch.omit({ projectId: true }),
+        queryOverview.omit({ projectId: true }),
+      ]),
+      execute: async (params) => unwrap(await handleQuery({ ...params, projectId })),
     }),
     mymir_context: tool({
       description: DESCRIPTIONS.mymir_context,
-      inputSchema: z.object({
-        taskId: z.string().uuid().describe("Task UUID"),
-        depth: z.enum(["working"]).default("working").describe("Context depth"),
-      }),
+      inputSchema: contextWorking.omit({ projectId: true }),
       execute: async (params) =>
         unwrap(await handleContext({ ...params, projectId })),
     }),
@@ -168,58 +151,49 @@ export function refineScopedTools(taskId: string, projectId: string) {
         "Pass only the fields you want to change. " +
         "Use this to refine descriptions, add acceptance criteria, record decisions, or change status. " +
         "Array fields (decisions, acceptanceCriteria, files) APPEND by default. Set overwriteArrays=true to replace entirely.",
-      inputSchema: z.object({
-        title: taskFields.title,
-        description: taskFields.description,
-        status: taskFields.status,
-        acceptanceCriteria: taskFields.acceptanceCriteria,
-        decisions: taskFields.decisions,
-        tags: taskFields.tags,
-        category: taskFields.category,
-        files: taskFields.files,
-        implementationPlan: taskFields.implementationPlan,
-        executionRecord: taskFields.executionRecord,
-        overwriteArrays: taskFields.overwriteArrays,
-      }),
+      inputSchema: taskUpdate.omit({ action: true, taskId: true }),
       execute: async (params) =>
-        unwrap(await handleTask({ action: "update", taskId, projectId, ...params })),
+        unwrap(await handleTask({ action: "update", taskId, ...params })),
     }),
     mymir_edge: tool({
       description: DESCRIPTIONS.mymir_edge,
-      inputSchema: z.object({
-        action: z.enum(["create", "remove"]).describe("create=new edge, remove=delete"),
-        ...edgeFields,
-      }),
-      execute: async (params) =>
-        unwrap(await handleEdge(params)),
+      inputSchema: z.discriminatedUnion("action", [edgeCreate, edgeRemove]),
+      execute: async (params) => unwrap(await handleEdge(params)),
     }),
     mymir_query: tool({
       description: DESCRIPTIONS.mymir_query,
-      inputSchema: z.object({
-        type: z.enum(["search", "edges", "overview"]).describe("search=find by name or tag, edges=task relationships, overview=project structure"),
-        query: z.string().optional().describe("Search string for type='search'"),
-        taskId: z.string().optional().describe("Task UUID for type='edges'"),
-      }),
+      inputSchema: z.discriminatedUnion("type", [
+        querySearch.omit({ projectId: true }),
+        queryEdges,
+        queryOverview.omit({ projectId: true }),
+      ]),
       execute: async (params) =>
-        unwrap(await handleQuery({ ...params, projectId })),
+        unwrap(
+          await handleQuery(
+            params.type === "edges" ? params : { ...params, projectId },
+          ),
+        ),
     }),
     mymir_context: tool({
       description: DESCRIPTIONS.mymir_context,
-      inputSchema: z.object({
-        taskId: z.string().uuid().describe("Task UUID"),
-        depth: z.enum(["working"]).default("working").describe("Context depth"),
-      }),
+      inputSchema: contextWorking.omit({ projectId: true }),
       execute: async (params) =>
         unwrap(await handleContext({ ...params, projectId })),
     }),
     mymir_analyze: tool({
       description: DESCRIPTIONS.mymir_analyze,
-      inputSchema: z.object({
-        type: z.enum(["ready", "blocked", "downstream", "plannable"]).describe("ready=unblocked work, blocked=waiting tasks, downstream=impact, plannable=draft tasks ready for planning"),
-        taskId: z.string().optional().describe("Task UUID for 'downstream'"),
-      }),
+      inputSchema: z.discriminatedUnion("type", [
+        analyzeReady.omit({ projectId: true }),
+        analyzeBlocked.omit({ projectId: true }),
+        analyzeDownstream,
+        analyzePlannable.omit({ projectId: true }),
+      ]),
       execute: async (params) =>
-        unwrap(await handleAnalyze({ ...params, projectId })),
+        unwrap(
+          await handleAnalyze(
+            params.type === "downstream" ? params : { ...params, projectId },
+          ),
+        ),
     }),
   };
 }
@@ -237,61 +211,79 @@ export function allTools(projectId: string) {
   return {
     mymir_project: tool({
       description: DESCRIPTIONS.mymir_project,
-      inputSchema: z.object({
-        action: z.enum(["update"]).describe("update=modify project fields"),
-        title: z.string().optional().describe("Short project name (2-5 words)"),
-        description: z.string().optional().describe("3-5 sentence brief"),
-        status: z.enum(["brainstorming", "decomposing", "active", "archived"]).optional().describe("Project lifecycle status"),
-        categories: z.array(z.string()).optional().describe("Task categories for drawer grouping (e.g. ['backend', 'frontend'])"),
-      }),
+      inputSchema: projectUpdate.omit({ projectId: true }),
       execute: async (params) =>
         unwrap(await handleProject({ ...params, projectId })),
     }),
     mymir_task: tool({
       description: DESCRIPTIONS.mymir_task,
-      inputSchema: z.object({
-        action: z.enum(["create", "update", "delete", "reorder"]).describe("create=new task, update=modify, delete=remove, reorder=change position"),
-        ...taskFields,
-      }),
+      inputSchema: z.discriminatedUnion("action", [
+        taskCreate.omit({ projectId: true }),
+        taskUpdate,
+        taskDelete,
+        taskReorder,
+      ]),
       execute: async (params) =>
-        unwrap(await handleTask({ ...params, projectId })),
+        unwrap(
+          await handleTask(
+            params.action === "create" ? { ...params, projectId } : params,
+          ),
+        ),
     }),
     mymir_edge: tool({
       description: DESCRIPTIONS.mymir_edge,
-      inputSchema: z.object({
-        action: z.enum(["create", "update", "remove"]).describe("create=new edge, update=modify, remove=delete"),
-        ...edgeFields,
-      }),
-      execute: async (params) =>
-        unwrap(await handleEdge(params)),
+      inputSchema: z.discriminatedUnion("action", [
+        edgeCreate,
+        edgeUpdate,
+        edgeRemove,
+      ]),
+      execute: async (params) => unwrap(await handleEdge(params)),
     }),
     mymir_query: tool({
       description: DESCRIPTIONS.mymir_query,
-      inputSchema: z.object({
-        type: z.enum(["search", "list", "edges", "overview"]).describe("search=find by name or tag, list=all tasks, edges=task relationships, overview=project structure"),
-        query: z.string().optional().describe("Search string for type='search'"),
-        taskId: z.string().optional().describe("Task UUID for type='edges'"),
-      }),
+      inputSchema: z.discriminatedUnion("type", [
+        querySearch.omit({ projectId: true }),
+        queryList.omit({ projectId: true }),
+        queryEdges,
+        queryOverview.omit({ projectId: true }),
+      ]),
       execute: async (params) =>
-        unwrap(await handleQuery({ ...params, projectId })),
+        unwrap(
+          await handleQuery(
+            params.type === "edges" ? params : { ...params, projectId },
+          ),
+        ),
     }),
     mymir_context: tool({
       description: DESCRIPTIONS.mymir_context,
-      inputSchema: z.object({
-        taskId: z.string().uuid().describe("Task UUID"),
-        depth: z.enum(["summary", "working", "agent", "planning"]).default("working").describe("summary=quick, working=detailed, agent=multi-hop for coding, planning=spec for pre-implementation"),
-      }),
+      inputSchema: z.discriminatedUnion("depth", [
+        contextSummary,
+        contextWorking.omit({ projectId: true }),
+        contextAgent,
+        contextPlanning,
+      ]),
       execute: async (params) =>
-        unwrap(await handleContext({ ...params, projectId })),
+        unwrap(
+          await handleContext(
+            params.depth === "working" ? { ...params, projectId } : params,
+          ),
+        ),
     }),
     mymir_analyze: tool({
       description: DESCRIPTIONS.mymir_analyze,
-      inputSchema: z.object({
-        type: z.enum(["ready", "blocked", "downstream", "critical_path", "plannable"]).describe("ready=unblocked work, blocked=waiting tasks, downstream=impact, critical_path=bottleneck, plannable=draft tasks ready for planning"),
-        taskId: z.string().optional().describe("Task UUID for 'downstream'"),
-      }),
+      inputSchema: z.discriminatedUnion("type", [
+        analyzeReady.omit({ projectId: true }),
+        analyzeBlocked.omit({ projectId: true }),
+        analyzeDownstream,
+        analyzeCriticalPath.omit({ projectId: true }),
+        analyzePlannable.omit({ projectId: true }),
+      ]),
       execute: async (params) =>
-        unwrap(await handleAnalyze({ ...params, projectId })),
+        unwrap(
+          await handleAnalyze(
+            params.type === "downstream" ? params : { ...params, projectId },
+          ),
+        ),
     }),
   };
 }

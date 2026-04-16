@@ -10,7 +10,12 @@ import {
   type NewTask,
   type NewTaskEdge,
 } from "@/lib/db/schema";
-import type { Decision, EdgeType, HistoryEntry } from "@/lib/types";
+import type {
+  AcceptanceCriterion,
+  Decision,
+  EdgeType,
+  HistoryEntry,
+} from "@/lib/types";
 import { getDependencyChain } from "./traversal";
 import { dbEvents } from "@/lib/events";
 
@@ -119,50 +124,75 @@ export async function deleteProject(projectId: string) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Input accepted by createTask. Widens `acceptanceCriteria` and `decisions`
+ * to accept plain strings — `createTask` itself normalizes them into the
+ * structured row shape stored in Postgres.
+ */
+export type CreateTaskInput =
+  & Omit<NewTask, "id" | "acceptanceCriteria" | "decisions">
+  & {
+    acceptanceCriteria?: (string | AcceptanceCriterion)[];
+    decisions?: (string | Decision)[];
+  };
+
+/**
+ * Coerce an acceptance-criterion input item into the stored row shape.
+ * @param c - Either a raw string or an existing criterion object.
+ * @returns Structured criterion with id, text, and checked flag.
+ */
+function normalizeCriterion(c: string | AcceptanceCriterion): AcceptanceCriterion {
+  if (typeof c === "string") {
+    return { id: crypto.randomUUID(), text: c, checked: false };
+  }
+  return c;
+}
+
+/**
+ * Coerce a decision input item into the stored row shape.
+ * @param d - Either a raw string or an existing decision object.
+ * @returns Structured decision with id, text, date, and source.
+ */
+function normalizeDecision(d: string | Decision): Decision {
+  if (typeof d === "string") {
+    return {
+      id: crypto.randomUUID(),
+      text: d,
+      date: new Date().toISOString().slice(0, 10),
+      source: "refinement",
+    };
+  }
+  return d;
+}
+
+/**
  * Insert a new task under a project.
  * @param data - Task fields to insert.
  * @returns The created task with id, title, projectId, and order.
  */
-export async function createTask(data: Omit<NewTask, "id">) {
-  if (Array.isArray(data.acceptanceCriteria)) {
-    data = {
-      ...data,
-      acceptanceCriteria: (data.acceptanceCriteria as unknown[]).map((c) => {
-        if (typeof c === "string") return { id: crypto.randomUUID(), text: c, checked: false };
-        return c as { id: string; text: string; checked: boolean };
-      }),
-    };
-  }
+export async function createTask(data: CreateTaskInput) {
+  const row: Omit<NewTask, "id"> = {
+    ...data,
+    acceptanceCriteria: (data.acceptanceCriteria ?? []).map(normalizeCriterion),
+    decisions: (data.decisions ?? []).map(normalizeDecision),
+  };
 
-  if (Array.isArray(data.decisions)) {
-    data = {
-      ...data,
-      decisions: (data.decisions as unknown[]).map((d) => {
-        if (typeof d === "string") {
-          return { id: crypto.randomUUID(), text: d, date: new Date().toISOString().slice(0, 10), source: "refinement" as const };
-        }
-        return d as Decision;
-      }),
-    };
-  }
-
-  if (data.order === undefined || data.order === 0) {
+  if (row.order === undefined || row.order === 0) {
     const [maxRow] = await db
       .select({ maxOrder: sql<number>`COALESCE(MAX(${tasks.order}), -1)` })
       .from(tasks)
-      .where(eq(tasks.projectId, data.projectId));
-    data = { ...data, order: (maxRow?.maxOrder ?? -1) + 1 };
+      .where(eq(tasks.projectId, row.projectId));
+    row.order = (maxRow?.maxOrder ?? -1) + 1;
   }
 
   const [task] = await db
     .insert(tasks)
     .values({
-      ...data,
+      ...row,
       history: [
         makeHistoryEntry({
           type: "created",
           label: "Task created",
-          description: `Task "${data.title}" created.`,
+          description: `Task "${row.title}" created.`,
           actor: "ai",
         }),
       ],

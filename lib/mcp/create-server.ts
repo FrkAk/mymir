@@ -1,5 +1,4 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod/v4";
 import {
   DESCRIPTIONS,
   handleProject,
@@ -10,6 +9,14 @@ import {
   handleAnalyze,
 } from "@/lib/ai/tool-handlers";
 import type { ToolResult } from "@/lib/ai/tool-handlers";
+import {
+  projectSchema,
+  taskSchema,
+  edgeSchema,
+  querySchema,
+  contextSchema,
+  analyzeSchema,
+} from "@/lib/api/mcp-schemas";
 
 /**
  * Format a successful tool result as MCP content.
@@ -105,20 +112,7 @@ export function registerAllTools(server: McpServer): void {
     "mymir_project",
     {
       description: DESCRIPTIONS.mymir_project,
-      inputSchema: z.object({
-        action: z.enum(["list", "create", "select", "update"])
-          .describe("list=get all, create=new, select=confirm working project, update=modify"),
-        projectId: z.string().optional()
-          .describe("Project UUID. Required for select and update"),
-        title: z.string().optional()
-          .describe("Project name (2-5 words). Required for create"),
-        description: z.string().optional()
-          .describe("3-5 sentence brief: problem, user, features, tech direction, constraints"),
-        status: z.enum(["brainstorming", "decomposing", "active", "archived"]).optional()
-          .describe("Lifecycle: brainstorming → decomposing → active → archived"),
-        categories: z.array(z.string()).optional()
-          .describe("Task categories for this project (e.g. ['backend', 'frontend', 'mcp']). Determines drawer grouping in the UI."),
-      }),
+      inputSchema: projectSchema,
       annotations: {
         title: "Manage Project",
         readOnlyHint: false,
@@ -130,13 +124,12 @@ export function registerAllTools(server: McpServer): void {
     async (params) => {
       try {
         if (params.action === "select") {
-          if (!params.projectId) return err("projectId required for select. Call with action='list' first to get IDs.");
-          return json({ selected: params.projectId, _hints: ["Stateless mode — pass this projectId explicitly on every subsequent call."] });
+          return json({
+            selected: params.projectId,
+            _hints: ["Stateless mode — pass this projectId explicitly on every subsequent call."],
+          });
         }
-        // select returns early above; narrow for handleProject
-        const { action, ...rest } = params;
-        const result = await handleProject({ action: action as "list" | "create" | "update", ...rest });
-        return toMcp(result);
+        return toMcp(await handleProject(params));
       } catch (e) {
         return err(e instanceof Error ? e.message : String(e));
       }
@@ -147,40 +140,7 @@ export function registerAllTools(server: McpServer): void {
     "mymir_task",
     {
       description: DESCRIPTIONS.mymir_task,
-      inputSchema: z.object({
-        action: z.enum(["create", "update", "delete", "reorder"])
-          .describe("create=new task, update=modify fields, delete=remove, reorder=change position"),
-        taskId: z.string().optional()
-          .describe("Task UUID. Required for update/delete/reorder"),
-        projectId: z.string().optional()
-          .describe("Project UUID. Required for create"),
-        title: z.string().optional()
-          .describe("Short task name. Required for create"),
-        description: z.string().optional()
-          .describe("2-4 sentences: what to build, why it matters, key technical approach. Required for create"),
-        status: z.enum(["draft", "planned", "in_progress", "done"]).optional()
-          .describe("Task lifecycle status"),
-        acceptanceCriteria: z.array(z.string()).optional()
-          .describe("2-4 testable done conditions"),
-        decisions: z.array(z.string()).optional()
-          .describe("Key technical decisions and constraints"),
-        tags: z.array(z.string()).optional()
-          .describe("Tags for grouping (e.g. ['auth', 'backend'])"),
-        category: z.string().optional()
-          .describe("Drawer group for this task. Should match a project category. Run mymir_project to see available categories."),
-        files: z.array(z.string()).optional()
-          .describe("File paths this task touches"),
-        implementationPlan: z.string().optional()
-          .describe("Implementation plan written during planning phase"),
-        executionRecord: z.string().optional()
-          .describe("Summary of what was built during implementation"),
-        order: z.number().int().optional()
-          .describe("0-based position. For create: initial order. For reorder: new position"),
-        preview: z.boolean().optional().default(true)
-          .describe("For delete only: true=show impact (default), false=actually delete"),
-        overwriteArrays: z.boolean().optional().default(false)
-          .describe("For update only: true=replace decisions/acceptanceCriteria/files entirely. Default false=append to existing"),
-      }),
+      inputSchema: taskSchema,
       annotations: {
         title: "Manage Task",
         readOnlyHint: false,
@@ -203,20 +163,7 @@ export function registerAllTools(server: McpServer): void {
     "mymir_edge",
     {
       description: DESCRIPTIONS.mymir_edge,
-      inputSchema: z.object({
-        action: z.enum(["create", "update", "remove"])
-          .describe("create=new edge, update=modify, remove=delete"),
-        edgeId: z.string().optional()
-          .describe("Edge UUID. Required for update. For remove: use this OR source+target+type"),
-        sourceTaskId: z.string().optional()
-          .describe("Source task UUID. Required for create. For remove: alternative to edgeId"),
-        targetTaskId: z.string().optional()
-          .describe("Target task UUID. Required for create. For remove: alternative to edgeId"),
-        edgeType: z.enum(["depends_on", "relates_to"]).optional()
-          .describe("depends_on = source needs target done first. relates_to = informational link"),
-        note: z.string().optional()
-          .describe("Why this relationship exists — propagates to agent context for downstream tasks"),
-      }),
+      inputSchema: edgeSchema,
       annotations: {
         title: "Manage Edge",
         readOnlyHint: false,
@@ -239,16 +186,7 @@ export function registerAllTools(server: McpServer): void {
     "mymir_query",
     {
       description: DESCRIPTIONS.mymir_query,
-      inputSchema: z.object({
-        type: z.enum(["search", "list", "edges", "overview"])
-          .describe("search=find by name or tag, list=all tasks, edges=task relationships, overview=project structure"),
-        query: z.string().optional()
-          .describe("Search string for type='search' — matches against task titles and tags"),
-        taskId: z.string().optional()
-          .describe("Task UUID for type='edges'"),
-        projectId: z.string().optional()
-          .describe("Project UUID. Required for search/list/overview"),
-      }),
+      inputSchema: querySchema,
       annotations: {
         title: "Query Tasks",
         readOnlyHint: true,
@@ -271,13 +209,7 @@ export function registerAllTools(server: McpServer): void {
     "mymir_context",
     {
       description: DESCRIPTIONS.mymir_context,
-      inputSchema: z.object({
-        taskId: z.string().describe("Task UUID"),
-        depth: z.enum(["summary", "working", "agent", "planning"]).default("working")
-          .describe("summary=quick, working=detailed, agent=multi-hop for coding, planning=spec for pre-implementation"),
-        projectId: z.string().optional()
-          .describe("Project UUID. Required for 'working' depth"),
-      }),
+      inputSchema: contextSchema,
       annotations: {
         title: "Get Task Context",
         readOnlyHint: true,
@@ -300,14 +232,7 @@ export function registerAllTools(server: McpServer): void {
     "mymir_analyze",
     {
       description: DESCRIPTIONS.mymir_analyze,
-      inputSchema: z.object({
-        type: z.enum(["ready", "blocked", "downstream", "critical_path", "plannable"])
-          .describe("ready=unblocked work, blocked=waiting tasks, downstream=impact, critical_path=bottleneck, plannable=draft tasks ready for planning"),
-        taskId: z.string().optional()
-          .describe("Task UUID. Required for 'downstream'"),
-        projectId: z.string().optional()
-          .describe("Project UUID. Required for ready/blocked/critical_path/plannable"),
-      }),
+      inputSchema: analyzeSchema,
       annotations: {
         title: "Analyze Graph",
         readOnlyHint: true,
@@ -325,7 +250,6 @@ export function registerAllTools(server: McpServer): void {
       }
     },
   );
-
 }
 
 /**
