@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { getProject } from '@/lib/graph/queries';
-import { TopBar } from '@/components/layout/TopBar';
+import { ProjectChrome } from '@/components/workspace/ProjectChrome';
 import { notFound } from 'next/navigation';
 
 interface LayoutProps {
@@ -28,8 +28,14 @@ export default async function ProjectLayout({ children, params }: LayoutProps) {
 
   return (
     <>
-      <TopBar
+      <ProjectChrome
+        projectId={projectId}
         projectName={project.title}
+        description={project.description}
+        identifier={project.identifier}
+        status={project.status}
+        categories={project.categories}
+        taskCount={totalCount}
         stageLabel={`${totalCount} tasks`}
         taskStats={`${doneCount}/${totalCount} tasks done`}
       />

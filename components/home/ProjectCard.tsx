@@ -10,6 +10,8 @@ import { deleteProject } from '@/lib/graph/mutations';
 interface ProjectCardProps {
   /** @param id - Project ID. */
   id: string;
+  /** @param identifier - Human-readable project identifier (handle). */
+  identifier: string;
   /** @param title - Project title. */
   title: string;
   /** @param description - Short project description. */
@@ -33,6 +35,7 @@ interface ProjectCardProps {
  */
 export function ProjectCard({
   id,
+  identifier,
   title,
   description,
   status,
@@ -127,6 +130,8 @@ export function ProjectCard({
             {status === 'brainstorming' ? 'Idea' : status === 'decomposing' ? 'Building' : status === 'active' ? 'Active' : status}
           </span>
           <span className="font-mono text-[10px] tabular-nums text-text-muted">
+            <span className="text-text-secondary">{identifier}</span>
+            <span className="mx-1.5 text-text-muted/40">·</span>
             {tasksDone}/{totalTasks} tasks{tasksInProgress > 0 ? ` · ${tasksInProgress} active` : ''} · {lastActive}
           </span>
         </div>

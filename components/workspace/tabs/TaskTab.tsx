@@ -29,8 +29,8 @@ interface TaskTabProps {
   decisions: Decision[];
   /** @param edges - Edges connected to this task. */
   edges: TaskEdge[];
-  /** @param taskMap - Map of task IDs to titles. */
-  taskMap: Map<string, { title: string; status: string }>;
+  /** @param taskMap - Map of task IDs to title, status, and taskRef. */
+  taskMap: Map<string, { title: string; status: string; taskRef: string }>;
   /** @param onSelectNode - Called when a relationship link is clicked. */
   onSelectNode: (taskId: string) => void;
   /** @param files - File paths this task touches. */
@@ -718,8 +718,8 @@ interface RelationshipsSectionProps {
   taskId: string;
   /** @param edges - Edges connected to this task. */
   edges: TaskEdge[];
-  /** @param taskMap - Map of task IDs to title+status. */
-  taskMap: Map<string, { title: string; status: string }>;
+  /** @param taskMap - Map of task IDs to title, status, and taskRef. */
+  taskMap: Map<string, { title: string; status: string; taskRef: string }>;
   /** @param onSelectNode - Navigate to a connected task. */
   onSelectNode: (taskId: string) => void;
   /** @param onGraphChange - Refresh graph data after mutation. */
@@ -846,9 +846,12 @@ function RelationshipsSection({
                   <span className="text-text-muted/30 text-[10px]">&rsaquo;</span>
                   <button
                     onClick={() => onSelectNode(otherId)}
-                    className="min-w-0 cursor-pointer truncate text-xs text-accent transition-colors hover:underline"
+                    className="min-w-0 flex cursor-pointer items-center gap-1.5 text-xs transition-colors"
                   >
-                    {other?.title ?? otherId.slice(0, 8)}
+                    <span className="shrink-0 font-mono text-[10px] text-text-muted tabular-nums">
+                      {other?.taskRef ?? otherId.slice(0, 8)}
+                    </span>
+                    <span className="truncate text-accent hover:underline">{other?.title ?? ''}</span>
                   </button>
                   {other && (
                     <Badge status={other.status} className="ml-auto shrink-0 scale-90 opacity-60" />
