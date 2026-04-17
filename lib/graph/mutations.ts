@@ -13,6 +13,7 @@ import {
 import type { Decision, EdgeType, HistoryEntry } from "@/lib/types";
 import { getDependencyChain } from "./traversal";
 import { dbEvents } from "@/lib/events";
+import { deriveIdentifier, composeTaskRef } from "./identifier";
 
 /** Emit a change event to all connected SSE clients via the in-memory event bus. */
 function notifyChange() {
@@ -62,16 +63,47 @@ async function appendTaskHistory(
 // Project
 // ---------------------------------------------------------------------------
 
+/** Input for createProject — identifier is optional and auto-derived when omitted. */
+export type CreateProjectInput = Omit<NewProject, "id" | "identifier"> & {
+  identifier?: string;
+};
+
+/**
+ * Pick an identifier that's not already taken, auto-suffixing on collision.
+ *
+ * @param base - Starting identifier (e.g. derived from title).
+ * @returns Unique identifier.
+ * @throws If no unique variant found within 1000 attempts.
+ */
+async function pickAvailableIdentifier(base: string): Promise<string> {
+  const existing = await db.select({ identifier: projects.identifier }).from(projects);
+  const taken = new Set(existing.map((r) => r.identifier));
+  if (!taken.has(base)) return base;
+  for (let i = 2; i < 1000; i++) {
+    const candidate = `${base}${i}`.slice(0, 12);
+    if (!taken.has(candidate)) return candidate;
+  }
+  throw new Error(`Could not find unique identifier for base "${base}"`);
+}
+
 /**
  * Insert a new project.
- * @param data - Project fields to insert.
+ *
+ * If `identifier` is omitted, it is derived from the title and auto-suffixed on
+ * collision. If provided, collision surfaces the DB unique-violation error.
+ *
+ * @param data - Project fields. Identifier optional.
  * @returns The created project row.
  */
-export async function createProject(data: Omit<NewProject, "id">) {
+export async function createProject(data: CreateProjectInput) {
+  const identifier = data.identifier
+    ?? (await pickAvailableIdentifier(deriveIdentifier(data.title) || "PROJECT"));
+
   const [project] = await db
     .insert(projects)
     .values({
       ...data,
+      identifier,
       history: [
         makeHistoryEntry({
           type: "created",
@@ -118,12 +150,20 @@ export async function deleteProject(projectId: string) {
 // Task
 // ---------------------------------------------------------------------------
 
+/** Input for createTask — sequenceNumber is always computed internally. */
+export type CreateTaskInput = Omit<NewTask, "id" | "sequenceNumber">;
+
 /**
  * Insert a new task under a project.
- * @param data - Task fields to insert.
- * @returns The created task with id, title, projectId, and order.
+ *
+ * Uses a transaction-scoped PostgreSQL advisory lock keyed on the project UUID
+ * to serialize concurrent task creation and prevent sequence_number collisions.
+ * Computes order (append-to-end when unset) and sequenceNumber inside the lock.
+ *
+ * @param data - Task fields. sequenceNumber is assigned internally.
+ * @returns Task summary with composed taskRef.
  */
-export async function createTask(data: Omit<NewTask, "id">) {
+export async function createTask(data: CreateTaskInput) {
   if (Array.isArray(data.acceptanceCriteria)) {
     data = {
       ...data,
@@ -146,30 +186,57 @@ export async function createTask(data: Omit<NewTask, "id">) {
     };
   }
 
-  if (data.order === undefined || data.order === 0) {
-    const [maxRow] = await db
-      .select({ maxOrder: sql<number>`COALESCE(MAX(${tasks.order}), -1)` })
+  const result = await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${data.projectId}))`);
+
+    const [proj] = await tx
+      .select({ identifier: projects.identifier })
+      .from(projects)
+      .where(eq(projects.id, data.projectId));
+    if (!proj) throw new Error(`Project ${data.projectId} not found`);
+
+    const [maxRow] = await tx
+      .select({
+        maxOrder: sql<number>`COALESCE(MAX(${tasks.order}), -1)`,
+        maxSeq: sql<number>`COALESCE(MAX(${tasks.sequenceNumber}), 0)`,
+      })
       .from(tasks)
       .where(eq(tasks.projectId, data.projectId));
-    data = { ...data, order: (maxRow?.maxOrder ?? -1) + 1 };
-  }
 
-  const [task] = await db
-    .insert(tasks)
-    .values({
-      ...data,
-      history: [
-        makeHistoryEntry({
-          type: "created",
-          label: "Task created",
-          description: `Task "${data.title}" created.`,
-          actor: "ai",
-        }),
-      ],
-    })
-    .returning();
+    const sequenceNumber = (maxRow?.maxSeq ?? 0) + 1;
+    const order = data.order === undefined || data.order === 0
+      ? (maxRow?.maxOrder ?? -1) + 1
+      : data.order;
+
+    const [task] = await tx
+      .insert(tasks)
+      .values({
+        ...data,
+        order,
+        sequenceNumber,
+        history: [
+          makeHistoryEntry({
+            type: "created",
+            label: "Task created",
+            description: `Task "${data.title}" created.`,
+            actor: "ai",
+          }),
+        ],
+      })
+      .returning();
+
+    return {
+      id: task.id,
+      title: task.title,
+      projectId: task.projectId,
+      order: task.order,
+      sequenceNumber: task.sequenceNumber,
+      taskRef: composeTaskRef(proj.identifier, task.sequenceNumber),
+    };
+  });
+
   notifyChange();
-  return { id: task.id, title: task.title, projectId: task.projectId, order: task.order };
+  return result;
 }
 
 // ---------------------------------------------------------------------------
