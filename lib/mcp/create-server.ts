@@ -168,7 +168,7 @@ export function registerAllTools(server: McpServer): void {
         decisions: z.array(z.string()).optional()
           .describe("Key technical decisions and constraints"),
         tags: z.array(z.string()).optional()
-          .describe("Tags for grouping (e.g. ['auth', 'backend'])"),
+          .describe("Kebab-case, four dimensions: work type (bug/feature/refactor/docs/test/chore/perf), cross-cutting concern (quality attribute or feature cluster), tech (project stack when it's the thing changing), priority (release-blocker/core/normal/backlog). Check mymir_query type='overview' before coining new. Do NOT duplicate category or status."),
         category: z.string().optional()
           .describe("Drawer group for this task. Should match a project category. Run mymir_project to see available categories."),
         files: z.array(z.string()).optional()

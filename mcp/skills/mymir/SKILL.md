@@ -33,7 +33,9 @@ Tasks have: title, description, status, category, acceptanceCriteria, decisions,
 
 Responses include `taskRef` (e.g. `MYMR-83`) — use when referring to tasks in output; pass UUIDs for tool calls.
 
-`category` determines drawer grouping (one per task, defined at project level). `tags` are freeform for filtering.
+`category` determines drawer grouping (one per task, defined at project level).
+
+`tags` group tasks across four dimensions (work type, cross-cutting concern, tech, priority). Honor user-specified tags as-is.
 
 Task titles: verb+noun format (e.g., "Implement JWT auth", "Fix login redirect").
 
@@ -167,6 +169,7 @@ Stay concise — same density as before, just use markdown structure so the UI r
 3. `mymir_task` `action='update'` → save changes
 
 ### Create a task
+0. Check `mymir_query type='overview'` Tag vocabulary section for existing tags to reuse.
 1. `mymir_task` `action='create'` with title (verb+noun), description, acceptanceCriteria, category, and tags
 2. `mymir_edge` `action='create'` for any dependencies or relationships
 3. Verify: `mymir_query` `type='edges'` on the new task — confirm edges look correct
