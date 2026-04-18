@@ -9,6 +9,7 @@ import { ContextTab } from './tabs/ContextTab';
 import { HistoryTab } from './tabs/HistoryTab';
 import { updateTask } from '@/lib/graph/mutations';
 import { useUndo, UndoButton } from '@/hooks/useUndo';
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import type { Task, TaskEdge } from '@/lib/db/schema';
 
 interface DetailPanelProps {
@@ -16,8 +17,8 @@ interface DetailPanelProps {
   taskId: string;
   /** @param projectId - UUID of the project. */
   projectId: string;
-  /** @param task - The full task data. */
-  task: Task;
+  /** @param task - The full task data, enriched with composed taskRef. */
+  task: Task & { taskRef: string };
   /** @param parentName - Project title. */
   parentName: string;
   /** @param categories - Project-level categories for category selector. */
@@ -28,8 +29,8 @@ interface DetailPanelProps {
   contextText: string;
   /** @param planningContext - Pre-built planning context string. */
   planningContext: string;
-  /** @param taskMap - Map of task IDs to titles for relationship display. */
-  taskMap: Map<string, { title: string; status: string }>;
+  /** @param taskMap - Map of task IDs to title, status, and taskRef for relationship display. */
+  taskMap: Map<string, { title: string; status: string; taskRef: string }>;
   /** @param onClose - Called when the close button is clicked. */
   onClose: () => void;
   /** @param onSelectNode - Called when a relationship link is clicked. */
@@ -165,6 +166,8 @@ export function DetailPanel({
     onGraphChange?.();
   }, [taskId, task.tags, newTagValue, onGraphChange]);
 
+  const { status: refCopyStatus, copy: copyRef } = useCopyToClipboard();
+
   const currentIdx = STATUS_FLOW.indexOf(task.status);
   const header = STATUS_HEADER[task.status] ?? STATUS_HEADER.draft;
 
@@ -176,9 +179,49 @@ export function DetailPanel({
           {/* Top row: type badge + parent + close */}
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-2">
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${header.badge} transition-colors duration-500`}
-              >{'\u25CF'} Task</span>
+              <button
+                type="button"
+                onClick={() => copyRef(task.taskRef)}
+                aria-label={`Copy task ID ${task.taskRef}`}
+                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all duration-500 ${header.badge} hover:brightness-110`}
+              >
+                <span>{'\u25CF'}</span>
+                <AnimatePresence mode="wait" initial={false}>
+                  {refCopyStatus === 'copied' ? (
+                    <motion.span
+                      key="done"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.1 }}
+                      aria-live="polite"
+                    >
+                      Copied
+                    </motion.span>
+                  ) : refCopyStatus === 'error' ? (
+                    <motion.span
+                      key="error"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.1 }}
+                      aria-live="polite"
+                    >
+                      Copy failed
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="ref"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      {task.taskRef}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
               {parentName && (
                 <>
                   <span className="text-text-muted text-[10px]">/</span>

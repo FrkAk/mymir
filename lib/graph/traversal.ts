@@ -7,7 +7,7 @@ import {
   projects,
   taskEdges,
 } from "@/lib/db/schema";
-import { composeTaskRef } from "./identifier";
+import { asIdentifier, composeTaskRef, type Identifier } from "./identifier";
 
 /**
  * Fetch a project's identifier prefix for composing taskRefs.
@@ -15,12 +15,12 @@ import { composeTaskRef } from "./identifier";
  * @param projectId - UUID of the project.
  * @returns Identifier string, or null if project not found.
  */
-async function getProjectIdentifier(projectId: string): Promise<string | null> {
+async function getProjectIdentifier(projectId: string): Promise<Identifier | null> {
   const [row] = await db
     .select({ identifier: projects.identifier })
     .from(projects)
     .where(eq(projects.id, projectId));
-  return row?.identifier ?? null;
+  return row ? asIdentifier(row.identifier) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -227,7 +227,7 @@ export async function getDownstream(
   const infoMap = new Map<string, { taskRef: string; title: string }>();
   for (const t of taskRows) {
     infoMap.set(t.id, {
-      taskRef: composeTaskRef(t.identifier, t.sequenceNumber),
+      taskRef: composeTaskRef(asIdentifier(t.identifier), t.sequenceNumber),
       title: t.title,
     });
   }
