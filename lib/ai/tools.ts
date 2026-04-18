@@ -44,7 +44,7 @@ const taskFields = {
   status: z.enum(["draft", "planned", "in_progress", "done"]).optional().describe("Task lifecycle status"),
   acceptanceCriteria: z.array(z.string()).optional().describe("2-4 testable done conditions"),
   decisions: z.array(z.string()).optional().describe("Key technical decisions and constraints"),
-  tags: z.array(z.string()).optional().describe("Tags for filtering (e.g. ['auth', 'backend'])"),
+  tags: z.array(z.string()).optional().describe("Kebab-case, four dimensions: work type (bug/feature/refactor/docs/test/chore/perf), cross-cutting concern (quality attribute or feature cluster), tech (project stack when it's the thing changing), priority (release-blocker/core/normal/backlog). Check mymir_query type='overview' before coining new. Do NOT duplicate category or status."),
   category: z.string().optional().describe("Drawer group for this task. Should match a project category."),
   files: z.array(z.string()).optional().describe("File paths this task touches"),
   implementationPlan: z.string().optional().describe("Implementation plan written during planning phase"),
