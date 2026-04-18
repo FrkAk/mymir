@@ -165,7 +165,7 @@ export function StructureView({
     if (hasSearch) {
       const q = searchQuery.trim().toLowerCase();
       filtered = filtered
-        .map(([cat, groupTasks]) => [cat, groupTasks.filter((t) => t.title.toLowerCase().includes(q))] as [string, TaskWithRef[]])
+        .map(([cat, groupTasks]) => [cat, groupTasks.filter((t) => t.title.toLowerCase().includes(q) || t.taskRef.toLowerCase().includes(q))] as [string, TaskWithRef[]])
         .filter(([, groupTasks]) => groupTasks.length > 0);
     }
 
