@@ -5,7 +5,12 @@ import { db } from '@/lib/db';
 import { projects, tasks } from '@/lib/db/schema';
 import type { ProjectStatus } from '@/lib/types';
 import { parseIdentifier } from '@/lib/graph/identifier';
-import { updateProject, type ProjectUpdate } from '@/lib/graph/mutations';
+import {
+  deleteCategory,
+  renameCategory,
+  updateProject,
+  type ProjectUpdate,
+} from '@/lib/graph/mutations';
 import { dbEvents } from '@/lib/events';
 
 /**
@@ -72,11 +77,10 @@ export async function updateProjectSettings(
   projectId: string,
   changes: ProjectSettingsChanges,
 ): Promise<ProjectSettingsResult> {
-  const update: ProjectUpdate = {
-    title: changes.title,
-    description: changes.description,
-    categories: changes.categories,
-  };
+  const update: ProjectUpdate = {};
+  if (changes.title !== undefined) update.title = changes.title;
+  if (changes.description !== undefined) update.description = changes.description;
+  if (changes.categories !== undefined) update.categories = changes.categories;
 
   if (changes.identifier !== undefined) {
     const parsed = parseIdentifier(changes.identifier);
@@ -104,5 +108,50 @@ export async function updateProjectSettings(
       code: 'unknown',
       message: 'Something went wrong. Please try again.',
     };
+  }
+}
+
+/** Result of a project category update action. Discriminated on `ok`. */
+export type ProjectCategoryResult =
+  | { ok: true }
+  | { ok: false; code: 'unknown'; message: string };
+
+/**
+ * Rename a category on a project, propagating to associated tasks.
+ * @param projectId - UUID of the project.
+ * @param oldName - Existing category name.
+ * @param newName - Replacement category name.
+ * @returns Discriminated result — `{ ok: true }` or a typed failure.
+ */
+export async function renameProjectCategory(
+  projectId: string,
+  oldName: string,
+  newName: string,
+): Promise<ProjectCategoryResult> {
+  try {
+    await renameCategory(projectId, oldName, newName);
+    return { ok: true };
+  } catch (err) {
+    console.error('renameProjectCategory failed', { projectId, err });
+    return { ok: false, code: 'unknown', message: 'Failed to rename category' };
+  }
+}
+
+/**
+ * Delete a category from a project, propagating to associated tasks.
+ * @param projectId - UUID of the project.
+ * @param categoryName - Category to remove.
+ * @returns Discriminated result — `{ ok: true }` or a typed failure.
+ */
+export async function deleteProjectCategory(
+  projectId: string,
+  categoryName: string,
+): Promise<ProjectCategoryResult> {
+  try {
+    await deleteCategory(projectId, categoryName);
+    return { ok: true };
+  } catch (err) {
+    console.error('deleteProjectCategory failed', { projectId, err });
+    return { ok: false, code: 'unknown', message: 'Failed to remove category' };
   }
 }

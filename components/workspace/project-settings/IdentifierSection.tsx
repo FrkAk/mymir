@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { motion } from 'motion/react';
-import { validateIdentifier } from '@/lib/graph/identifier';
+import { parseIdentifier } from '@/lib/graph/identifier';
 import { updateProjectSettings } from '@/lib/actions/project';
 
 interface IdentifierSectionProps {
@@ -71,7 +71,7 @@ function identifierReducer(state: IdentifierState, action: IdentifierAction): Id
 /**
  * Identifier edit + 2-click rename confirm.
  *
- * Validation runs live via {@link validateIdentifier}. On submit, replaces the
+ * Validation runs live via {@link parseIdentifier}. On submit, replaces the
  * Save/Cancel row with an inline danger banner explaining the external-ref
  * breakage; the actual rename only fires on the second confirm click.
  *
@@ -80,6 +80,7 @@ function identifierReducer(state: IdentifierState, action: IdentifierAction): Id
  */
 export function IdentifierSection({ projectId, identifier, taskCount, onUpdated }: IdentifierSectionProps) {
   const [state, dispatch] = useReducer(identifierReducer, { kind: 'closed', initial: identifier });
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     dispatch({ type: 'sync_initial', initial: identifier });
@@ -91,7 +92,8 @@ export function IdentifierSection({ projectId, identifier, taskCount, onUpdated 
    */
   const handleDraftChange = (raw: string): void => {
     const next = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
-    const validationError = validateIdentifier(next) ?? undefined;
+    const parsed = parseIdentifier(next);
+    const validationError = parsed.ok ? undefined : parsed.error;
     dispatch({ type: 'edit', draft: next, validationError });
   };
 
@@ -101,14 +103,20 @@ export function IdentifierSection({ projectId, identifier, taskCount, onUpdated 
    * @returns Resolves once the server round-trip completes.
    */
   const commitRename = async (draft: string): Promise<void> => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     dispatch({ type: 'submit' });
-    const result = await updateProjectSettings(projectId, { identifier: draft });
-    if (result.ok) {
-      dispatch({ type: 'cancel' });
-      onUpdated?.();
-      return;
+    try {
+      const result = await updateProjectSettings(projectId, { identifier: draft });
+      if (result.ok) {
+        dispatch({ type: 'cancel' });
+        onUpdated?.();
+        return;
+      }
+      dispatch({ type: 'submit_failure', serverError: result.message });
+    } finally {
+      submittingRef.current = false;
     }
-    dispatch({ type: 'submit_failure', serverError: result.message });
   };
 
   if (state.kind === 'closed') {

@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { renameCategory, deleteCategory, updateProject } from '@/lib/graph/mutations';
+import {
+  deleteProjectCategory,
+  renameProjectCategory,
+  updateProjectSettings,
+} from '@/lib/actions/project';
 
 interface CategoriesSectionProps {
   projectId: string;
@@ -32,16 +36,19 @@ export function CategoriesSection({ projectId, categories, onUpdated }: Categori
    */
   const handleAdd = async () => {
     const name = newName.trim();
-    if (!name || categories.includes(name)) { setAdding(false); setNewName(''); return; }
-    setError(null);
-    try {
-      await updateProject(projectId, { categories: [...categories, name] });
-      setAdding(false);
-      setNewName('');
-      onUpdated?.();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add category');
+    if (!name) { setAdding(false); setNewName(''); return; }
+    if (categories.includes(name)) {
+      setError(`"${name}" already exists`);
+      return;
     }
+    setError(null);
+    const result = await updateProjectSettings(projectId, {
+      categories: [...categories, name],
+    });
+    if (!result.ok) { setError(result.message); return; }
+    setAdding(false);
+    setNewName('');
+    onUpdated?.();
   };
 
   /**
@@ -51,12 +58,9 @@ export function CategoriesSection({ projectId, categories, onUpdated }: Categori
    */
   const handleRemove = async (name: string) => {
     setError(null);
-    try {
-      await deleteCategory(projectId, name);
-      onUpdated?.();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to remove category');
-    }
+    const result = await deleteProjectCategory(projectId, name);
+    if (!result.ok) { setError(result.message); return; }
+    onUpdated?.();
   };
 
   /**
@@ -66,19 +70,20 @@ export function CategoriesSection({ projectId, categories, onUpdated }: Categori
    */
   const commitRename = async (oldName: string) => {
     const trimmed = renameValue.trim();
-    if (!trimmed || trimmed === oldName || categories.includes(trimmed)) {
+    if (!trimmed || trimmed === oldName) {
       setRenaming(null);
       return;
     }
-    setError(null);
-    try {
-      await renameCategory(projectId, oldName, trimmed);
+    if (categories.includes(trimmed)) {
       setRenaming(null);
-      onUpdated?.();
-    } catch (err) {
-      setRenaming(null);
-      setError(err instanceof Error ? err.message : 'Failed to rename category');
+      setError(`"${trimmed}" already exists`);
+      return;
     }
+    setError(null);
+    const result = await renameProjectCategory(projectId, oldName, trimmed);
+    setRenaming(null);
+    if (!result.ok) { setError(result.message); return; }
+    onUpdated?.();
   };
 
   return (

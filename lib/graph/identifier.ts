@@ -44,20 +44,6 @@ export function parseIdentifier(raw: string): ParseResult<Identifier> {
 }
 
 /**
- * Validate a user-supplied project identifier (legacy API).
- *
- * @deprecated Use {@link parseIdentifier} instead. Returns `null` on success
- * (error-last convention is error-prone).
- *
- * @param id - Candidate identifier.
- * @returns Error message if invalid, or `null` if valid.
- */
-export function validateIdentifier(id: string): string | null {
-  const parsed = parseIdentifier(id);
-  return parsed.ok ? null : parsed.error;
-}
-
-/**
  * Derive a short uppercase prefix from a project title.
  *
  * Multi-word titles yield initials (e.g. "Mymir Platform" → "MP").

@@ -767,9 +767,13 @@ export function ForceGraph({
           if (hoveredEdgeRef.current) { hoveredEdgeRef.current = null; needsRedrawRef.current = true; }
         }
 
-        const isPinned = hit && hit.fx != null && hit.fy != null;
-        const tooltipText = hit ? (isPinned ? `${hit.taskRef} · ${hit.title} (dbl-click to unpin)` : `${hit.taskRef} · ${hit.title}`) : "";
-        tooltipRef.current = hit ? { text: tooltipText, x: sx, y: sy } : null;
+        if (hit) {
+          const isPinned = hit.fx != null && hit.fy != null;
+          const suffix = isPinned ? " (dbl-click to unpin)" : "";
+          tooltipRef.current = { text: `${hit.taskRef} · ${hit.title}${suffix}`, x: sx, y: sy };
+        } else {
+          tooltipRef.current = null;
+        }
         if (hit) needsRedrawRef.current = true;
       });
     }

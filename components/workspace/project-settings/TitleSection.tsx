@@ -23,7 +23,7 @@ export function TitleSection({ projectId, initialTitle, onUpdated }: TitleSectio
   const [syncedInitialTitle, setSyncedInitialTitle] = useState(initialTitle);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  if (initialTitle !== syncedInitialTitle) {
+  if (initialTitle !== syncedInitialTitle && !editing) {
     setSyncedInitialTitle(initialTitle);
     setValue(initialTitle);
   }

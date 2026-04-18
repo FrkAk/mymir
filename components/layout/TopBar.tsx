@@ -50,7 +50,7 @@ export function TopBar({ projectName, stageLabel, taskStats, projectId, projectS
             Mymir
           </Link>
           {projectName && (
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <span className="text-text-muted">/</span>
               {projectId && onOpenProjectSettings ? (
                 <ProjectBreadcrumb

@@ -23,20 +23,22 @@ export function DescriptionSection({ projectId, initialDescription, onUpdated }:
   const [syncedInitialDescription, setSyncedInitialDescription] = useState(initialDescription);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  if (initialDescription !== syncedInitialDescription) {
+  if (initialDescription !== syncedInitialDescription && !editing) {
     setSyncedInitialDescription(initialDescription);
     setValue(initialDescription);
   }
 
   /**
-   * Persist the description if it changed.
+   * Persist the trimmed description if it changed.
    * @returns Resolves once the server action completes.
    */
   const commit = useCallback(async () => {
     setEditing(false);
-    if (value === initialDescription) { setServerError(null); return; }
+    const trimmed = value.trim();
+    if (trimmed !== value) setValue(trimmed);
+    if (trimmed === initialDescription) { setServerError(null); return; }
     setServerError(null);
-    const result = await updateProjectSettings(projectId, { description: value });
+    const result = await updateProjectSettings(projectId, { description: trimmed });
     if (!result.ok) { setServerError(result.message); return; }
     onUpdated?.();
   }, [value, initialDescription, projectId, onUpdated]);
