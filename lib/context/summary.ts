@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { tasks, projects } from "@/lib/db/schema";
 import type { EdgeType, AcceptanceCriterion, Decision } from "@/lib/types";
 import { getTaskEdgesDetailed } from "@/lib/graph/queries";
-import { composeTaskRef } from "@/lib/graph/identifier";
+import { asIdentifier, composeTaskRef } from "@/lib/graph/identifier";
 
 /** Detailed edge information for summary context. */
 type EdgeDetail = {
@@ -44,6 +44,9 @@ export async function buildSummaryContext(
     .select({ title: projects.title, identifier: projects.identifier })
     .from(projects)
     .where(eq(projects.id, task.projectId));
+  if (!project) {
+    console.error('Task has no joinable project', { taskId: task.id, projectId: task.projectId });
+  }
 
   const detailedEdges = await getTaskEdgesDetailed(taskId);
 
@@ -61,7 +64,9 @@ export async function buildSummaryContext(
 
   return {
     node: {
-      taskRef: project ? composeTaskRef(project.identifier, task.sequenceNumber) : "",
+      taskRef: project
+        ? composeTaskRef(asIdentifier(project.identifier), task.sequenceNumber)
+        : "",
       title: task.title,
       status: task.status,
       description: task.description,

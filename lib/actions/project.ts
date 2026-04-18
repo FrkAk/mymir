@@ -4,8 +4,8 @@ import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { projects, tasks } from '@/lib/db/schema';
 import type { ProjectStatus } from '@/lib/types';
-import { validateIdentifier } from '@/lib/graph/identifier';
-import { updateProject } from '@/lib/graph/mutations';
+import { parseIdentifier } from '@/lib/graph/identifier';
+import { updateProject, type ProjectUpdate } from '@/lib/graph/mutations';
 import { dbEvents } from '@/lib/events';
 
 /**
@@ -72,15 +72,22 @@ export async function updateProjectSettings(
   projectId: string,
   changes: ProjectSettingsChanges,
 ): Promise<ProjectSettingsResult> {
+  const update: ProjectUpdate = {
+    title: changes.title,
+    description: changes.description,
+    categories: changes.categories,
+  };
+
   if (changes.identifier !== undefined) {
-    const validationError = validateIdentifier(changes.identifier);
-    if (validationError) {
-      return { ok: false, code: 'invalid_identifier', message: validationError };
+    const parsed = parseIdentifier(changes.identifier);
+    if (!parsed.ok) {
+      return { ok: false, code: 'invalid_identifier', message: parsed.error };
     }
+    update.identifier = parsed.value;
   }
 
   try {
-    await updateProject(projectId, changes as Record<string, unknown>);
+    await updateProject(projectId, update);
     return { ok: true };
   } catch (err) {
     const code = (err as { code?: string } | null)?.code;
@@ -91,10 +98,11 @@ export async function updateProjectSettings(
         message: 'That identifier is already in use by another project',
       };
     }
+    console.error('updateProjectSettings failed', { projectId, err });
     return {
       ok: false,
       code: 'unknown',
-      message: err instanceof Error ? err.message : 'Failed to update project',
+      message: 'Something went wrong. Please try again.',
     };
   }
 }

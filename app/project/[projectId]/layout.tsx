@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { getProject } from '@/lib/graph/queries';
-import { ProjectChrome } from '@/components/workspace/ProjectChrome';
+import { WorkspaceHeader } from '@/components/workspace/WorkspaceHeader';
 import { notFound } from 'next/navigation';
 
 interface LayoutProps {
@@ -28,7 +28,7 @@ export default async function ProjectLayout({ children, params }: LayoutProps) {
 
   return (
     <>
-      <ProjectChrome
+      <WorkspaceHeader
         projectId={projectId}
         projectName={project.title}
         description={project.description}

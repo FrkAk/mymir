@@ -9,7 +9,7 @@ import {
   conversations,
 } from "@/lib/db/schema";
 import type { EdgeType } from "@/lib/types";
-import { composeTaskRef } from "./identifier";
+import { asIdentifier, composeTaskRef, enrichWithTaskRef } from "./identifier";
 
 // ---------------------------------------------------------------------------
 // Task helpers
@@ -158,9 +158,9 @@ export async function getProjectTasksSlim(projectId: string): Promise<TaskSlim[]
     .where(eq(tasks.projectId, projectId))
     .orderBy(asc(tasks.order));
 
-  return rows.map((t) => ({
+  return enrichWithTaskRef(rows, asIdentifier(proj.identifier)).map((t) => ({
     id: t.id,
-    taskRef: composeTaskRef(proj.identifier, t.sequenceNumber),
+    taskRef: t.taskRef,
     title: t.title,
     status: t.status,
     tags: t.tags,
@@ -431,9 +431,10 @@ export async function searchTasks(
   const trimmed = matchingTasks.slice(0, 20);
   const stateMap = await deriveTaskStates(projectId, trimmed);
 
-  return trimmed.map((t) => ({
+  const identifier = asIdentifier(proj.identifier);
+  return enrichWithTaskRef(trimmed, identifier).map((t) => ({
     id: t.id,
-    taskRef: composeTaskRef(proj.identifier, t.sequenceNumber),
+    taskRef: t.taskRef,
     title: t.title,
     status: t.status,
     state: stateMap.get(t.id) ?? "draft",
@@ -496,7 +497,7 @@ export async function getTaskEdgesDetailed(
       .where(sql`${tasks.id} IN ${ids}`);
     for (const t of taskRows) {
       taskInfoMap.set(t.id, {
-        taskRef: composeTaskRef(t.identifier, t.sequenceNumber),
+        taskRef: composeTaskRef(asIdentifier(t.identifier), t.sequenceNumber),
         title: t.title,
         status: t.status,
       });
@@ -594,7 +595,7 @@ export async function fetchTaskSummaries(taskIds: string[]) {
     .where(sql`${tasks.id} IN ${taskIds}`);
   return rows.map((r) => ({
     id: r.id,
-    taskRef: composeTaskRef(r.identifier, r.sequenceNumber),
+    taskRef: composeTaskRef(asIdentifier(r.identifier), r.sequenceNumber),
     title: r.title,
     status: r.status,
     description: r.description,

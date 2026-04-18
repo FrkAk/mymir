@@ -4,7 +4,7 @@ import { eq, asc, sql, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { projects, tasks, taskEdges } from "@/lib/db/schema";
 import type { EdgeType } from "@/lib/types";
-import { composeTaskRef } from "@/lib/graph/identifier";
+import { asIdentifier, composeTaskRef, enrichWithTaskRef } from "@/lib/graph/identifier";
 import { compress } from "./format";
 
 /** Task summary within a project overview. */
@@ -65,9 +65,10 @@ export async function buildProjectOverview(
     .where(eq(tasks.projectId, projectId))
     .orderBy(asc(tasks.order));
 
-  const taskSummaries: TaskSummary[] = allTasks.map((t) => ({
+  const identifier = asIdentifier(project.identifier);
+  const taskSummaries: TaskSummary[] = enrichWithTaskRef(allTasks, identifier).map((t) => ({
     id: t.id,
-    taskRef: composeTaskRef(project.identifier, t.sequenceNumber),
+    taskRef: t.taskRef,
     title: t.title,
     status: t.status,
     description: compress(t.description, 100),
@@ -87,7 +88,7 @@ export async function buildProjectOverview(
     const infoMap = new Map<string, { taskRef: string; title: string }>();
     for (const t of allTasks) {
       infoMap.set(t.id, {
-        taskRef: composeTaskRef(project.identifier, t.sequenceNumber),
+        taskRef: composeTaskRef(identifier, t.sequenceNumber),
         title: t.title,
       });
     }

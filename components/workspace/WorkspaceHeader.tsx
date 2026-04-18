@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TopBar } from '@/components/layout/TopBar';
-import { ProjectSettingsModal } from '@/components/workspace/ProjectSettingsModal';
+import { ProjectSettingsModal } from '@/components/workspace/project-settings/ProjectSettingsModal';
+import type { ProjectStatus } from '@/lib/types';
 
-interface ProjectChromeProps {
+interface WorkspaceHeaderProps {
   /** @param projectId - UUID of the project. */
   projectId: string;
   /** @param projectName - Current project title for breadcrumb + modal. */
@@ -15,7 +16,7 @@ interface ProjectChromeProps {
   /** @param identifier - Current project identifier (e.g. MYMR). */
   identifier: string;
   /** @param status - Current project lifecycle status (brainstorming → decomposing → active → archived). */
-  status: string;
+  status: ProjectStatus;
   /** @param categories - Current project categories. */
   categories: string[];
   /** @param taskCount - Total number of tasks (drives rename warning copy). */
@@ -27,13 +28,13 @@ interface ProjectChromeProps {
 }
 
 /**
- * Client-side chrome for the workspace — renders TopBar with a gear trigger
+ * Client-side header for the workspace — renders TopBar with a gear trigger
  * and owns {@link ProjectSettingsModal} open state. Refreshes the server-layout
  * data via router.refresh() after any successful update.
- * @param props - Chrome props seeded from the server layout.
+ * @param props - Header props seeded from the server layout.
  * @returns TopBar plus modal.
  */
-export function ProjectChrome({
+export function WorkspaceHeader({
   projectId,
   projectName,
   description,
@@ -43,11 +44,14 @@ export function ProjectChrome({
   taskCount,
   stageLabel,
   taskStats,
-}: ProjectChromeProps) {
+}: WorkspaceHeaderProps) {
   const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const handleUpdated = () => {
+  /**
+   * Refresh server layout data and notify the workspace page of the update.
+   */
+  const handleUpdated = (): void => {
     router.refresh();
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('mymir:project-updated', { detail: { projectId } }));
@@ -76,4 +80,4 @@ export function ProjectChrome({
   );
 }
 
-export default ProjectChrome;
+export default WorkspaceHeader;

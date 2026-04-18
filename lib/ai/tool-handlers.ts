@@ -43,7 +43,8 @@ import {
   getPlannableTasks,
 } from "@/lib/graph/traversal";
 import type { EdgeType, Decision } from "@/lib/types";
-import { validateIdentifier } from "@/lib/graph/identifier";
+import { parseIdentifier } from "@/lib/graph/identifier";
+import type { ProjectUpdate } from "@/lib/graph/mutations";
 import {
   formatSummary,
   formatSearchResults,
@@ -256,15 +257,17 @@ export async function handleProject(p: ProjectParams): Promise<ToolResult> {
         return ok(await getProjectList());
       case "create": {
         if (!p.title) return fail("title required for create");
+        let parsedIdentifier;
         if (p.identifier !== undefined) {
-          const err = validateIdentifier(p.identifier);
-          if (err) return fail(err);
+          const parsed = parseIdentifier(p.identifier);
+          if (!parsed.ok) return fail(parsed.error);
+          parsedIdentifier = parsed.value;
         }
         const project = await createProject({
           title: p.title,
           description: p.description ?? "",
           categories: p.categories,
-          identifier: p.identifier,
+          identifier: parsedIdentifier,
         });
         const createHints: string[] = [];
         if (p.identifier === undefined) {
@@ -276,15 +279,15 @@ export async function handleProject(p: ProjectParams): Promise<ToolResult> {
         if (!p.projectId) return fail("projectId required for update");
         const notFound = await requireProject(p.projectId);
         if (notFound) return notFound;
-        const changes: Record<string, unknown> = {};
+        const changes: ProjectUpdate = {};
         if (p.title !== undefined) changes.title = p.title;
         if (p.description !== undefined) changes.description = p.description;
         if (p.status !== undefined) changes.status = p.status;
         if (p.categories !== undefined) changes.categories = p.categories;
         if (p.identifier !== undefined) {
-          const err = validateIdentifier(p.identifier);
-          if (err) return fail(err);
-          changes.identifier = p.identifier;
+          const parsed = parseIdentifier(p.identifier);
+          if (!parsed.ok) return fail(parsed.error);
+          changes.identifier = parsed.value;
         }
         const project = await updateProject(p.projectId, changes);
         const updateHints: string[] = [];

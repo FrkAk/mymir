@@ -166,7 +166,7 @@ export function DetailPanel({
     onGraphChange?.();
   }, [taskId, task.tags, newTagValue, onGraphChange]);
 
-  const { copied: refCopied, copy: copyRef } = useCopyToClipboard();
+  const { status: refCopyStatus, copy: copyRef } = useCopyToClipboard();
 
   const currentIdx = STATUS_FLOW.indexOf(task.status);
   const header = STATUS_HEADER[task.status] ?? STATUS_HEADER.draft;
@@ -187,7 +187,7 @@ export function DetailPanel({
               >
                 <span>{'\u25CF'}</span>
                 <AnimatePresence mode="wait" initial={false}>
-                  {refCopied ? (
+                  {refCopyStatus === 'copied' ? (
                     <motion.span
                       key="done"
                       initial={{ opacity: 0 }}
@@ -197,6 +197,17 @@ export function DetailPanel({
                       aria-live="polite"
                     >
                       Copied
+                    </motion.span>
+                  ) : refCopyStatus === 'error' ? (
+                    <motion.span
+                      key="error"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.1 }}
+                      aria-live="polite"
+                    >
+                      Copy failed
                     </motion.span>
                   ) : (
                     <motion.span

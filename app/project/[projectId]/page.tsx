@@ -8,10 +8,8 @@ import { DetailPanel } from '@/components/workspace/DetailPanel';
 import { ProjectChat } from '@/components/workspace/ProjectChat';
 import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import type { Task, TaskEdge } from '@/lib/db/schema';
-import { composeTaskRef } from '@/lib/graph/identifier';
+import { asIdentifier, enrichWithTaskRef, type TaskWithRef } from '@/lib/graph/identifier';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-
-type TaskWithRef = Task & { taskRef: string };
 
 interface ProjectGraph {
   id: string;
@@ -19,7 +17,7 @@ interface ProjectGraph {
   identifier: string;
   updatedAt: string;
   categories: string[];
-  tasks: TaskWithRef[];
+  tasks: TaskWithRef<Task>[];
   edges: TaskEdge[];
 }
 
@@ -41,11 +39,22 @@ function getMaxUpdatedAt(graph: ProjectGraph): string {
  * @returns Graph with each task carrying its composed taskRef.
  */
 function enrichGraph(graph: ProjectGraph): ProjectGraph {
-  const tasks = graph.tasks.map((t) => ({
-    ...t,
-    taskRef: composeTaskRef(graph.identifier, t.sequenceNumber),
-  }));
+  const tasks = enrichWithTaskRef(graph.tasks, asIdentifier(graph.identifier));
   return { ...graph, tasks };
+}
+
+/**
+ * Type guard narrowing a DOM Event to a `mymir:project-updated` CustomEvent.
+ * @param e - Incoming DOM event.
+ * @returns True when `e` carries the expected `{ projectId?: string }` detail shape.
+ */
+function isProjectUpdatedEvent(e: Event): e is CustomEvent<{ projectId?: string }> {
+  if (!(e instanceof CustomEvent)) return false;
+  const detail: unknown = e.detail;
+  if (detail === null || detail === undefined) return true;
+  if (typeof detail !== 'object') return false;
+  const maybe = detail as { projectId?: unknown };
+  return maybe.projectId === undefined || typeof maybe.projectId === 'string';
 }
 
 /**
@@ -93,11 +102,11 @@ export default function WorkspacePage() {
   // Real-time: SSE for instant updates + tab focus as fallback
   useRefreshOnFocus(refreshGraph, `/api/project/${projectId}/events`);
 
-  // Instant refresh after a Project Settings update (rename, etc.).
-  // SSE usually covers this, but the direct signal makes identifier renames feel synchronous.
+  // Primary signal for project-settings updates; SSE acts as a fallback if the window event is missed.
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ projectId?: string }>).detail;
+    const handler = (e: Event): void => {
+      if (!isProjectUpdatedEvent(e)) return;
+      const detail = e.detail;
       if (!detail?.projectId || detail.projectId === projectId) {
         lastModifiedRef.current = '';
         refreshGraph();
@@ -149,7 +158,6 @@ export default function WorkspacePage() {
     setSelectedTaskId(null);
   }, []);
 
-  // Build taskMap for relationship title, status, and taskRef resolution
   const taskMap = useMemo(() => {
     if (!graph) return new Map<string, { title: string; status: string; taskRef: string }>();
     const map = new Map<string, { title: string; status: string; taskRef: string }>();

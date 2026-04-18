@@ -9,7 +9,7 @@ import {
   fetchEdgeNotesByTarget,
   fetchTaskSummaries,
 } from "@/lib/graph/queries";
-import { composeTaskRef } from "@/lib/graph/identifier";
+import { asIdentifier, composeTaskRef } from "@/lib/graph/identifier";
 import { section, formatCriteria, formatDecisions } from "./format";
 
 /**
@@ -27,7 +27,12 @@ export async function buildAgentContext(taskId: string): Promise<string> {
     .select({ identifier: projects.identifier })
     .from(projects)
     .where(eq(projects.id, task.projectId));
-  const taskRef = project ? composeTaskRef(project.identifier, task.sequenceNumber) : "";
+  if (!project) {
+    console.error('Task has no joinable project', { taskId: task.id, projectId: task.projectId });
+  }
+  const taskRef = project
+    ? composeTaskRef(asIdentifier(project.identifier), task.sequenceNumber)
+    : "";
 
   const tags = (task.tags as string[] | null) ?? [];
   const files = (task.files as string[] | null) ?? [];
@@ -76,7 +81,7 @@ export async function buildAgentContext(taskId: string): Promise<string> {
 
     const depMap = new Map(depTasks.map((dt) => [dt.id, {
       ...dt,
-      taskRef: composeTaskRef(dt.identifier, dt.sequenceNumber),
+      taskRef: composeTaskRef(asIdentifier(dt.identifier), dt.sequenceNumber),
     }]));
 
     for (const dep of deps) {

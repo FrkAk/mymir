@@ -6,7 +6,7 @@ import { tasks, projects, conversations } from "@/lib/db/schema";
 import type { Message } from "@/lib/types";
 import { getAncestors } from "@/lib/graph/traversal";
 import { fetchTask, getTaskEdgesDetailed } from "@/lib/graph/queries";
-import { composeTaskRef } from "@/lib/graph/identifier";
+import { asIdentifier, composeTaskRef } from "@/lib/graph/identifier";
 
 /** Full working context for AI assistant (1-hop). */
 type WorkingContext = {
@@ -50,7 +50,12 @@ export async function buildWorkingContext(
     fetchConversation(taskId, projectId),
   ]);
 
-  const taskRef = projectRow ? composeTaskRef(projectRow.identifier, task.sequenceNumber) : "";
+  if (!projectRow) {
+    console.error('Task has no joinable project', { taskId: task.id, projectId: task.projectId });
+  }
+  const taskRef = projectRow
+    ? composeTaskRef(asIdentifier(projectRow.identifier), task.sequenceNumber)
+    : "";
 
   const edges = detailedEdges.map((e) => ({
     id: e.connectedTask.id,
@@ -242,7 +247,7 @@ async function fetchSiblings(taskId: string, projectId: string) {
     .where(sql`${tasks.projectId} = ${projectId} AND ${tasks.id} != ${taskId}`);
   return rows.map((r) => ({
     id: r.id,
-    taskRef: composeTaskRef(r.identifier, r.sequenceNumber),
+    taskRef: composeTaskRef(asIdentifier(r.identifier), r.sequenceNumber),
     title: r.title,
     status: r.status,
   }));

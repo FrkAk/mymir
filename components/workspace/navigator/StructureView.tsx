@@ -834,7 +834,7 @@ export function StructureView({
                         >
                           {/* Status dot */}
                           <span className={`h-2 w-2 shrink-0 rounded-full transition-colors ${statusDot(task.status)} ${task.status === 'in_progress' ? 'status-pulse' : ''}`} />
-                          <span className={`shrink-0 w-[56px] font-mono text-[10px] font-medium tabular-nums ${
+                          <span className={`shrink-0 min-w-14 font-mono text-[10px] font-medium tabular-nums ${
                             selectedNodeId === task.id ? 'text-accent/70' : 'text-text-muted'
                           }`}>
                             {task.taskRef}

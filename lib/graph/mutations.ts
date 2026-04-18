@@ -13,7 +13,13 @@ import {
 import type { Decision, EdgeType, HistoryEntry } from "@/lib/types";
 import { getDependencyChain } from "./traversal";
 import { dbEvents } from "@/lib/events";
-import { deriveIdentifier, composeTaskRef } from "./identifier";
+import {
+  deriveIdentifier,
+  composeTaskRef,
+  asIdentifier,
+  type Identifier,
+} from "./identifier";
+import { IdentifierAllocationError, ProjectNotFoundError } from "./errors";
 
 /** Emit a change event to all connected SSE clients via the in-memory event bus. */
 function notifyChange() {
@@ -65,7 +71,7 @@ async function appendTaskHistory(
 
 /** Input for createProject — identifier is optional and auto-derived when omitted. */
 export type CreateProjectInput = Omit<NewProject, "id" | "identifier"> & {
-  identifier?: string;
+  identifier?: Identifier;
 };
 
 /** Advisory-lock key serializing identifier auto-derivation across concurrent creates. */
@@ -84,17 +90,17 @@ const IDENTIFIER_LOCK_KEY = sql`hashtext('mymir:project-identifier')`;
  */
 async function pickAvailableIdentifier(
   tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
-  base: string,
-): Promise<string> {
+  base: Identifier,
+): Promise<Identifier> {
   const existing = await tx.select({ identifier: projects.identifier }).from(projects);
   const taken = new Set(existing.map((r) => r.identifier));
   if (!taken.has(base)) return base;
   for (let i = 2; i < 1000; i++) {
     const suffix = String(i);
     const candidate = base.slice(0, 12 - suffix.length) + suffix;
-    if (!taken.has(candidate)) return candidate;
+    if (!taken.has(candidate)) return candidate as Identifier;
   }
-  throw new Error(`Could not find unique identifier for base "${base}"`);
+  throw new IdentifierAllocationError(base);
 }
 
 /**
@@ -112,10 +118,7 @@ export async function createProject(data: CreateProjectInput) {
     let identifier = data.identifier;
     if (identifier === undefined) {
       await tx.execute(sql`SELECT pg_advisory_xact_lock(${IDENTIFIER_LOCK_KEY})`);
-      identifier = await pickAvailableIdentifier(
-        tx,
-        deriveIdentifier(data.title) || "PROJECT",
-      );
+      identifier = await pickAvailableIdentifier(tx, deriveIdentifier(data.title));
     }
 
     const [row] = await tx
@@ -139,15 +142,23 @@ export async function createProject(data: CreateProjectInput) {
   return project;
 }
 
+/** Fields an `updateProject` caller is allowed to change. */
+export type ProjectUpdate = Partial<
+  Pick<
+    typeof projects.$inferInsert,
+    "title" | "description" | "status" | "categories" | "identifier"
+  >
+>;
+
 /**
  * Update a project's fields.
  * @param projectId - UUID of the project.
- * @param changes - Fields to update (title, description, etc.).
+ * @param changes - Typed subset of project fields to update.
  * @returns The updated project row.
  */
 export async function updateProject(
   projectId: string,
-  changes: Record<string, unknown>,
+  changes: ProjectUpdate,
 ) {
   const [updated] = await db
     .update(projects)
@@ -214,7 +225,7 @@ export async function createTask(data: CreateTaskInput) {
       .select({ identifier: projects.identifier })
       .from(projects)
       .where(eq(projects.id, data.projectId));
-    if (!proj) throw new Error(`Project ${data.projectId} not found`);
+    if (!proj) throw new ProjectNotFoundError(data.projectId);
 
     const [maxRow] = await tx
       .select({
@@ -252,7 +263,7 @@ export async function createTask(data: CreateTaskInput) {
       projectId: task.projectId,
       order: task.order,
       sequenceNumber: task.sequenceNumber,
-      taskRef: composeTaskRef(proj.identifier, task.sequenceNumber),
+      taskRef: composeTaskRef(asIdentifier(proj.identifier), task.sequenceNumber),
     };
   });
 
