@@ -161,6 +161,7 @@ When the user says "continue", "what's the status", or starts a new session:
 1. `mymir_task` with `action='create'` — title (verb+noun, e.g., "Implement JWT auth"), description, acceptanceCriteria, category, and tags. Category should match a project category — check with `mymir_project action='list'`.
 2. `mymir_edge` with `action='create'` for any dependencies or relationships
 3. Verify: `mymir_query` with `type='edges'` on the new task — confirm edges look correct
+4. Run Workflow F to check if existing tasks need new edges to this task
 
 ### Delete a Task
 1. `mymir_task` with `action='delete'` (defaults to preview)
