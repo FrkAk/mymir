@@ -826,10 +826,10 @@ export function StructureView({
                       <div key={task.id} className="group/task flex items-center">
                         <button
                           onClick={() => onSelectNode(task.id)}
-                          className={`flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-all duration-150 hover:bg-surface-hover ${
+                          className={`flex flex-1 cursor-pointer items-center gap-2.5 rounded-lg border px-2.5 py-1.5 text-left transition-colors duration-150 hover:bg-surface-hover ${
                             selectedNodeId === task.id
-                              ? 'bg-accent/8 border border-accent/15'
-                              : ''
+                              ? 'bg-accent/8 border-accent/15'
+                              : 'border-transparent'
                           }`}
                         >
                           {/* Status dot */}

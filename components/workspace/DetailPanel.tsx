@@ -95,6 +95,7 @@ export function DetailPanel({
   const [newTagValue, setNewTagValue] = useState('');
   const [localTitle, setLocalTitle] = useState(task.title);
   const [prevTitle, setPrevTitle] = useState(task.title);
+  const [prevTaskId, setPrevTaskId] = useState(taskId);
   const [editingTitle, setEditingTitle] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
   const titleCancelledRef = useRef(false);
@@ -102,6 +103,14 @@ export function DetailPanel({
   if (task.title !== prevTitle) {
     setPrevTitle(task.title);
     setLocalTitle(task.title);
+  }
+
+  if (taskId !== prevTaskId) {
+    setPrevTaskId(taskId);
+    setCategoryOpen(false);
+    setAddingTag(false);
+    setNewTagValue('');
+    setEditingTitle(false);
   }
 
   // Close category tray on outside click

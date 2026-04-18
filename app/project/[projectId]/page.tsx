@@ -10,6 +10,7 @@ import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import type { Task, TaskEdge } from '@/lib/db/schema';
 import { asIdentifier, enrichWithTaskRef, type TaskWithRef } from '@/lib/graph/identifier';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { dedupedFetch } from '@/lib/fetch-dedupe';
 
 interface ProjectGraph {
   id: string;
@@ -65,14 +66,14 @@ export default function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
   const [graph, setGraph] = useState<ProjectGraph | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [contextText, setContextText] = useState('');
-  const [planningContext, setPlanningContext] = useState('');
+  const [taskContext, setTaskContext] = useState<{ agent: string; planning: string }>({ agent: '', planning: '' });
   const lastModifiedRef = useRef('');
 
   const refreshGraph = useCallback(async () => {
-    const res = await fetch(`/api/project/${projectId}/graph`);
-    if (!res.ok) return;
-    const data: ProjectGraph = await res.json();
+    const data = await dedupedFetch<ProjectGraph | null>(`graph:${projectId}`, () =>
+      fetch(`/api/project/${projectId}/graph`).then((r) => (r.ok ? r.json() : null)),
+    );
+    if (!data) return;
     const enriched = enrichGraph(data);
     const maxUpdated = getMaxUpdatedAt(enriched);
     if (maxUpdated !== lastModifiedRef.current) {
@@ -84,18 +85,17 @@ export default function WorkspacePage() {
   // Fetch project graph on mount
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const res = await fetch(`/api/project/${projectId}/graph`);
-      if (!res.ok || cancelled) return;
-      const data: ProjectGraph = await res.json();
-      if (cancelled) return;
+    dedupedFetch<ProjectGraph | null>(`graph:${projectId}`, () =>
+      fetch(`/api/project/${projectId}/graph`).then((r) => (r.ok ? r.json() : null)),
+    ).then((data) => {
+      if (cancelled || !data) return;
       const enriched = enrichGraph(data);
       const maxUpdated = getMaxUpdatedAt(enriched);
       if (maxUpdated !== lastModifiedRef.current) {
         lastModifiedRef.current = maxUpdated;
         setGraph(enriched);
       }
-    })();
+    });
     return () => { cancelled = true; };
   }, [projectId]);
 
@@ -121,8 +121,7 @@ export default function WorkspacePage() {
   if (selectedTaskId !== prevSelectedTaskId) {
     setPrevSelectedTaskId(selectedTaskId);
     if (!selectedTaskId) {
-      setContextText('');
-      setPlanningContext('');
+      setTaskContext({ agent: '', planning: '' });
     }
   }
 
@@ -131,20 +130,18 @@ export default function WorkspacePage() {
     if (!selectedTaskId) return;
 
     let cancelled = false;
-    fetch(`/api/project/${projectId}/context`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taskId: selectedTaskId }),
-    })
-      .then((r) => {
+    dedupedFetch(`context:${projectId}:${selectedTaskId}`, () =>
+      fetch(`/api/project/${projectId}/context`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taskId: selectedTaskId }),
+      }).then((r) => {
         if (!r.ok) throw new Error(`Context fetch failed: ${r.status}`);
-        return r.json();
-      })
-      .then((data: { agent: string; planning: string }) => {
-        if (!cancelled) {
-          setContextText(data.agent ?? '');
-          setPlanningContext(data.planning ?? '');
-        }
+        return r.json() as Promise<{ agent: string; planning: string }>;
+      }),
+    )
+      .then((data) => {
+        if (!cancelled) setTaskContext({ agent: data.agent ?? '', planning: data.planning ?? '' });
       })
       .catch((err) => { if (!cancelled) console.error('[workspace] context fetch failed:', err); });
     return () => { cancelled = true; };
@@ -200,15 +197,14 @@ export default function WorkspacePage() {
       right={
         selectedTask ? (
           <DetailPanel
-            key={selectedTaskId!}
             taskId={selectedTaskId!}
             projectId={projectId}
             task={selectedTask}
             parentName={graph.title}
             categories={graph.categories}
             edges={taskEdges}
-            contextText={contextText}
-            planningContext={planningContext}
+            contextText={taskContext.agent}
+            planningContext={taskContext.planning}
             taskMap={taskMap}
             onClose={handleClose}
             onSelectNode={handleSelectNode}

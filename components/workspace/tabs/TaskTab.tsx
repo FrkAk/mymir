@@ -13,8 +13,23 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { getSettings } from '@/lib/settings';
 import { getMessageText, convertPersistedToUIMessages } from '@/lib/chat-helpers';
 import { useUndo, UndoButton } from '@/hooks/useUndo';
+import { dedupedFetch } from '@/lib/fetch-dedupe';
 import type { TaskEdge } from '@/lib/db/schema';
 import type { AcceptanceCriterion, Decision } from '@/lib/types';
+
+/**
+ * Fetches persisted task chat history, deduped across concurrent callers.
+ * @param projectId - Project UUID.
+ * @param taskId - Task UUID.
+ * @returns Resolved chat messages.
+ */
+function loadHistory(projectId: string, taskId: string): Promise<UIMessage[]> {
+  return dedupedFetch(`task-history:${projectId}:${taskId}`, () =>
+    fetch(`/api/project/${projectId}/conversations?taskId=${taskId}`)
+      .then((r) => r.json())
+      .then((data) => convertPersistedToUIMessages(data.messages ?? [])),
+  );
+}
 
 interface TaskTabProps {
   /** @param taskId - UUID of the selected task. */
@@ -131,18 +146,23 @@ export function TaskTab({
   useEffect(() => {
     setLoadedHistory(null);
     setHistoryError(false);
-    fetch(`/api/project/${projectId}/conversations?taskId=${taskId}`)
-      .then((r) => r.json())
-      .then((data) => setLoadedHistory(convertPersistedToUIMessages(data.messages ?? [])))
-      .catch((err) => { console.error('[refine] history fetch failed:', err); setHistoryError(true); setLoadedHistory([]); });
+    let cancelled = false;
+    loadHistory(projectId, taskId)
+      .then((messages) => { if (!cancelled) setLoadedHistory(messages); })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('[refine] history fetch failed:', err);
+        setHistoryError(true);
+        setLoadedHistory([]);
+      });
+    return () => { cancelled = true; };
   }, [projectId, taskId]);
 
   const retryHistory = useCallback(() => {
     setHistoryError(false);
     setLoadedHistory(null);
-    fetch(`/api/project/${projectId}/conversations?taskId=${taskId}`)
-      .then((r) => r.json())
-      .then((data) => setLoadedHistory(convertPersistedToUIMessages(data.messages ?? [])))
+    loadHistory(projectId, taskId)
+      .then((messages) => setLoadedHistory(messages))
       .catch((err) => { console.error('[refine] history fetch failed:', err); setHistoryError(true); setLoadedHistory([]); });
   }, [projectId, taskId]);
 
