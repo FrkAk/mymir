@@ -126,6 +126,14 @@ claude plugin marketplace add ./plugins/claude-code
 claude plugin install mymir@mymir-local
 ```
 
+Then authenticate the MCP server — Claude Code does not trigger OAuth automatically:
+
+```text
+/mcp
+```
+
+Select **mymir** and complete the browser sign-in. You only need to do this once per machine; the token is cached.
+
 One-time setup. Mymir is available in every Claude Code session.
 
 To update after pulling changes: `claude plugin update mymir@mymir-local`, then restart Claude Code. MCP server changes (`lib/mcp/`) take effect immediately — no update needed.
@@ -150,7 +158,7 @@ codex marketplace add ./plugins
 
 Open Codex, run `/plugin`, search for **Mymir**, select it, install it, then restart Codex.
 
-The plugin loads the Mymir MCP server and the `mymir`, `brainstorm`, and `decompose` skills. Skills match by description when you mention tasks, projects, new ideas, or "break this down." You can also invoke the main skill explicitly with `$mymir`.
+The plugin loads the Mymir MCP server and the `mymir`, `brainstorm`, `decompose`, and `manage` skills. Skills match by description when you mention tasks, projects, new ideas, or "break this down." You can also invoke the main skill explicitly with `$mymir`.
 
 ### Gemini CLI
 

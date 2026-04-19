@@ -8,14 +8,16 @@ interface SharedGroup {
   copies: string[];
 }
 
-interface VersionTarget {
+interface FieldTarget {
   path: string;
   jsonPath: string[];
 }
 
-interface VersionSync {
-  canonical: string;
-  copies: VersionTarget[];
+interface FieldSync {
+  name: string;
+  canonicalPath: string;
+  canonicalJsonPath: string[];
+  copies: FieldTarget[];
 }
 
 const shared: SharedGroup[] = [
@@ -44,19 +46,35 @@ const shared: SharedGroup[] = [
     ],
   },
   {
-    name: "manage agent",
+    name: "manage (agent + skill)",
     canonical: "plugins/claude-code/agents/manage.md",
-    copies: ["plugins/gemini/skills/manage/SKILL.md"],
+    copies: [
+      "plugins/codex/skills/manage/SKILL.md",
+      "plugins/gemini/skills/manage/SKILL.md",
+    ],
   },
 ];
 
-const versionSync: VersionSync = {
-  canonical: "plugins/claude-code/.claude-plugin/plugin.json",
-  copies: [
-    { path: "plugins/codex/.codex-plugin/plugin.json", jsonPath: ["version"] },
-    { path: "plugins/gemini/gemini-extension.json", jsonPath: ["version"] },
-  ],
-};
+const fieldSyncs: FieldSync[] = [
+  {
+    name: "version",
+    canonicalPath: "plugins/claude-code/.claude-plugin/plugin.json",
+    canonicalJsonPath: ["version"],
+    copies: [
+      { path: "plugins/codex/.codex-plugin/plugin.json", jsonPath: ["version"] },
+      { path: "plugins/gemini/gemini-extension.json", jsonPath: ["version"] },
+    ],
+  },
+  {
+    name: "description",
+    canonicalPath: "plugins/claude-code/.claude-plugin/plugin.json",
+    canonicalJsonPath: ["description"],
+    copies: [
+      { path: "plugins/codex/.codex-plugin/plugin.json", jsonPath: ["description"] },
+      { path: "plugins/gemini/gemini-extension.json", jsonPath: ["description"] },
+    ],
+  },
+];
 
 /**
  * Computes the SHA-256 hex digest of a file's bytes.
@@ -136,27 +154,30 @@ for (const group of shared) {
   }
 }
 
-const canonicalManifest = JSON.parse(readFileSync(versionSync.canonical, "utf8")) as Record<string, unknown>;
-const canonicalVersion = canonicalManifest.version;
+for (const sync of fieldSyncs) {
+  const canonicalManifest = JSON.parse(readFileSync(sync.canonicalPath, "utf8")) as Record<string, unknown>;
+  const canonicalValue = getNested(canonicalManifest, sync.canonicalJsonPath);
 
-if (typeof canonicalVersion !== "string" || canonicalVersion.length === 0) {
-  console.error(`[no version] ${versionSync.canonical} is missing a string version field`);
-  failures++;
-} else {
-  for (const target of versionSync.copies) {
+  if (typeof canonicalValue !== "string" || canonicalValue.length === 0) {
+    console.error(`[no ${sync.name}] ${sync.canonicalPath} is missing a string ${sync.name} field`);
+    failures++;
+    continue;
+  }
+
+  for (const target of sync.copies) {
     const manifest = JSON.parse(readFileSync(target.path, "utf8")) as Record<string, unknown>;
-    const currentVersion = getNested(manifest, target.jsonPath);
-    if (currentVersion === canonicalVersion) {
-      console.log(`[ok]      ${target.path} version ${canonicalVersion}`);
+    const currentValue = getNested(manifest, target.jsonPath);
+    if (currentValue === canonicalValue) {
+      console.log(`[ok]      ${target.path} ${sync.name} ok`);
       continue;
     }
     if (fix) {
-      setNested(manifest, target.jsonPath, canonicalVersion);
+      setNested(manifest, target.jsonPath, canonicalValue);
       writeFileSync(target.path, JSON.stringify(manifest, null, 2) + "\n");
-      console.log(`[synced]  ${target.path} version → ${canonicalVersion}`);
+      console.log(`[synced]  ${target.path} ${sync.name} → ${canonicalValue}`);
       changes++;
     } else {
-      console.error(`[version drift] ${target.path}: ${String(currentVersion)} vs ${canonicalVersion}`);
+      console.error(`[${sync.name} drift] ${target.path}: ${String(currentValue)} vs ${canonicalValue}`);
       failures++;
     }
   }

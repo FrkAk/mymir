@@ -1,7 +1,7 @@
 ---
 description: Manage project context with Mymir — tasks, dependencies, decisions across sessions
-argument-hint: [task, action, or question]
-allowed-tools: [Read, Write, Edit, Glob, Grep, Bash]
+argument-hint: "[task, action, or question]"
+allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # Mymir
