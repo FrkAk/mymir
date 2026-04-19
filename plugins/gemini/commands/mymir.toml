@@ -1,4 +1,2 @@
 description = "Manage project context with Mymir — tasks, dependencies, decisions across sessions"
-prompt = """Follow the Mymir skill at skills/mymir/SKILL.md.
-
-Pass any arguments the user provided as intent: {{args}}"""
+prompt = """Use the mymir skill to handle the following intent: {{args}}"""

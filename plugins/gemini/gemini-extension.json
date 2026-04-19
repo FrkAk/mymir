@@ -4,8 +4,7 @@
   "description": "Persistent context network for coding projects. Tracks tasks, dependencies, and decisions across sessions.",
   "mcpServers": {
     "mymir": {
-      "url": "http://localhost:3000/api/mcp"
+      "httpUrl": "http://localhost:3000/api/mcp"
     }
-  },
-  "contextFileName": "skills/mymir/SKILL.md"
+  }
 }

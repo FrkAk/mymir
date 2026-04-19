@@ -32,7 +32,7 @@ const shared: SharedGroup[] = [
     canonical: "plugins/claude-code/agents/brainstorm.md",
     copies: [
       "plugins/codex/skills/brainstorm/SKILL.md",
-      "plugins/gemini/agents/brainstorm.md",
+      "plugins/gemini/skills/brainstorm/SKILL.md",
     ],
   },
   {
@@ -40,13 +40,13 @@ const shared: SharedGroup[] = [
     canonical: "plugins/claude-code/agents/decompose.md",
     copies: [
       "plugins/codex/skills/decompose/SKILL.md",
-      "plugins/gemini/agents/decompose.md",
+      "plugins/gemini/skills/decompose/SKILL.md",
     ],
   },
   {
     name: "manage agent",
     canonical: "plugins/claude-code/agents/manage.md",
-    copies: ["plugins/gemini/agents/manage.md"],
+    copies: ["plugins/gemini/skills/manage/SKILL.md"],
   },
 ];
 

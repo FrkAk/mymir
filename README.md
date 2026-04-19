@@ -154,22 +154,29 @@ The plugin loads the Mymir MCP server and the `mymir`, `brainstorm`, and `decomp
 
 ### Gemini CLI
 
-Install Mymir as a Gemini extension:
+Make sure the dev server is running, then install Mymir as a Gemini extension:
 
 ```bash
-mkdir -p ~/.gemini/extensions
-ln -s $(pwd)/plugins/gemini ~/.gemini/extensions/mymir
+gemini extensions install ./plugins/gemini
 ```
 
-Start Gemini and run `/mcp auth mymir` to complete the OAuth flow. The extension loads the MCP server, the `mymir` skill as context, a `/mymir` slash command, and the three sub-agents (brainstorm / decompose / manage).
+This copies the extension into `~/.gemini/extensions/mymir`. Start Gemini and complete the OAuth flow:
 
-**Minimal setup (MCP server only, no skill, commands, or sub-agents):** add Mymir to `~/.gemini/settings.json`:
+```text
+/mcp auth mymir
+```
+
+A browser window opens for sign-in. After authorization, the extension loads the MCP server, the `/mymir` slash command, and the `mymir`, `brainstorm`, `decompose`, and `manage` skills (auto-activate by description).
+
+To update after pulling changes: `gemini extensions update mymir`. To remove: `gemini extensions uninstall mymir`.
+
+**Minimal setup (MCP server only, no commands or skills):** add Mymir to `~/.gemini/settings.json`:
 
 ```json
 {
   "mcpServers": {
     "mymir": {
-      "url": "http://localhost:3000/api/mcp"
+      "httpUrl": "http://localhost:3000/api/mcp"
     }
   }
 }
