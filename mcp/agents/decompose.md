@@ -192,14 +192,14 @@ Categories are broad domains that determine drawer grouping in the UI. Define th
 
 ### Tags
 
-Kebab-case, singular. Four dimensions — reuse existing values from the project overview before coining new.
+Kebab-case, singular. Four dimensions, each with a required count. Reuse existing values from the project overview before coining new.
 
-| Dimension | Vocabulary |
-|-----------|------------|
-| Work type | `bug`, `feature`, `refactor`, `docs`, `test`, `chore`, `perf` |
-| Cross-cutting concern | quality attribute (`security`, `a11y`, `dx`, …) or feature cluster spanning multiple categories |
-| Tech | project stack piece, only when the tech itself is changing |
-| Priority | `release-blocker`, `core`, `normal`, `backlog` |
+| Dimension | Count | Vocabulary |
+|-----------|-------|------------|
+| Work type | exactly 1 | `bug`, `feature`, `refactor`, `docs`, `test`, `chore`, `perf` |
+| Cross-cutting concern | ≥1 | quality attribute (`security`, `a11y`, `dx`, …) or feature cluster spanning multiple categories |
+| Tech | at most 2 | most important stack pieces the task touches (check overview for project tech vocab) |
+| Priority | exactly 1 | `release-blocker`, `core`, `normal`, `backlog` |
 
 Do NOT tag codebase area (use `category`) or status.
 

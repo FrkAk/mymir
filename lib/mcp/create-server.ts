@@ -168,7 +168,7 @@ export function registerAllTools(server: McpServer): void {
         decisions: z.array(z.string()).optional()
           .describe("Key technical decisions and constraints"),
         tags: z.array(z.string()).optional()
-          .describe("Kebab-case, four dimensions: work type (bug/feature/refactor/docs/test/chore/perf), cross-cutting concern (quality attribute or feature cluster), tech (project stack when it's the thing changing), priority (release-blocker/core/normal/backlog). Check mymir_query type='overview' before coining new. Do NOT duplicate category or status."),
+          .describe("Kebab-case. Every task carries exactly 1 work-type (bug/feature/refactor/docs/test/chore/perf), >=1 cross-cutting concern (open: quality attribute or feature cluster), at most 2 tech tags (most important stack pieces the task touches), and exactly 1 priority (release-blocker/core/normal/backlog). Do NOT tag codebase area (use category) or status. Check mymir_query type='overview' before coining new."),
         category: z.string().optional()
           .describe("Drawer group for this task. Should match a project category. Run mymir_project to see available categories."),
         files: z.array(z.string()).optional()
@@ -338,7 +338,7 @@ export function registerAllTools(server: McpServer): void {
  */
 export function createMcpServer(): McpServer {
   const server = new McpServer(
-    { name: "mymir", version: "1.1.1" },
+    { name: "mymir", version: "1.1.2" },
     { instructions: INSTRUCTIONS },
   );
   registerAllTools(server);

@@ -93,7 +93,7 @@ When a user or coding agent reports they finished a task:
 - **Decisions**: One-liner per decision: CHOICE + WHY.
   Example: "Chose Redis for refresh tokens — need fast revocation lookups"
 - **Files**: ALWAYS populate the `files` array — this is the highest-ROI field for downstream coding agents. Every file created or modified.
-- **Tags**: Four dimensions — work type, cross-cutting concern, tech, priority. Reuse existing vocabulary from the project overview before coining new. Honor user-specified tags as-is — don't rewrite them into canonical form.
+- **Tags**: MUST cover four dimensions on every task: exactly 1 work type (closed: `bug`/`feature`/`refactor`/`docs`/`test`/`chore`/`perf`), ≥1 cross-cutting concern (open: quality attribute or feature cluster), at most 2 tech tags (most important stack pieces the task touches), exactly 1 priority (closed: `release-blocker`/`core`/`normal`/`backlog`). Do NOT tag codebase area (`category` covers that) or status. Honor user-specified tags as-is — don't rewrite them into canonical form.
 
 **Markdown formatting rule (applies to description, executionRecord, implementationPlan, and decisions — NOT files, which are plain path strings):**
 Stay concise — same density as before, just use markdown structure so the UI renders it well:
