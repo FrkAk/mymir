@@ -115,26 +115,30 @@ Start the dev server and open [localhost:3000](http://localhost:3000):
 bun run dev
 ```
 
+Mymir ships as three standalone plugin/extension dirs — one per supported CLI under `plugins/<cli>/`. Each is vendor-native; pick the one that matches your tool.
+
 ### Claude Code plugin
 
-Make sure the dev server is running, then install the plugin globally:
+Make sure the dev server is running, then:
 
 ```bash
-claude plugin marketplace add ./mcp
+claude plugin marketplace add ./plugins/claude-code
 claude plugin install mymir@mymir-local
 ```
 
-This is a one-time setup. Mymir will be available in every Claude Code session.
+Then authenticate the MCP server — Claude Code does not trigger OAuth automatically:
 
-To update the plugin after pulling changes:
-
-```bash
-claude plugin update mymir@mymir-local
+```text
+/mcp
 ```
 
-Then restart Claude Code. MCP server changes (`lib/mcp/`) take effect immediately, no update needed.
+Select **mymir** and complete the browser sign-in. You only need to do this once per machine; the token is cached.
 
-Once installed, Claude has access to:
+One-time setup. Mymir is available in every Claude Code session.
+
+To update after pulling changes: `claude plugin update mymir@mymir-local`, then restart Claude Code. MCP server changes (`lib/mcp/`) take effect immediately — no update needed.
+
+Installed components:
 
 | Component | What it does |
 | --- | --- |
@@ -144,11 +148,55 @@ Once installed, Claude has access to:
 | **Manage agent** | Navigate, refine, track progress, restructure |
 | **Mymir skill** | Auto-invokes when conversation matches project planning |
 
+### Codex CLI
+
+Make sure the dev server is running, then add the local Codex marketplace:
+
+```bash
+codex marketplace add ./plugins
+```
+
+Open Codex, run `/plugin`, search for **Mymir**, select it, install it, then restart Codex.
+
+The plugin loads the Mymir MCP server and the `mymir`, `brainstorm`, `decompose`, and `manage` skills. Skills match by description when you mention tasks, projects, new ideas, or "break this down." You can also invoke the main skill explicitly with `$mymir`.
+
+### Gemini CLI
+
+Make sure the dev server is running, then install Mymir as a Gemini extension:
+
+```bash
+gemini extensions install ./plugins/gemini
+```
+
+This copies the extension into `~/.gemini/extensions/mymir`. Start Gemini and complete the OAuth flow:
+
+```text
+/mcp auth mymir
+```
+
+A browser window opens for sign-in. After authorization, the extension loads the MCP server, the `/mymir` slash command, and the `mymir`, `brainstorm`, `decompose`, and `manage` skills (auto-activate by description).
+
+To update after pulling changes: `gemini extensions update mymir`. To remove: `gemini extensions uninstall mymir`.
+
+**Minimal setup (MCP server only, no commands or skills):** add Mymir to `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "mymir": {
+      "httpUrl": "http://localhost:3000/api/mcp"
+    }
+  }
+}
+```
+
+Then run `/mcp auth mymir` inside Gemini.
+
 ---
 
 ## How is it going
 
-49 of 70 tasks done. We are almost there.
+69 of 106 tasks done. We are almost there.
 
 ![Progress](assets/progress.png)
 

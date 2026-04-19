@@ -1,0 +1,10 @@
+{
+  "name": "mymir",
+  "version": "1.2.0",
+  "description": "Persistent context network for coding projects. Tracks tasks, dependencies, and decisions across sessions.",
+  "mcpServers": {
+    "mymir": {
+      "httpUrl": "http://localhost:3000/api/mcp"
+    }
+  }
+}
