@@ -48,11 +48,6 @@ const shared: SharedGroup[] = [
     canonical: "plugins/claude-code/agents/manage.md",
     copies: ["plugins/gemini/agents/manage.md"],
   },
-  {
-    name: "mcp.json",
-    canonical: "plugins/claude-code/.mcp.json",
-    copies: ["plugins/codex/.mcp.json"],
-  },
 ];
 
 const versionSync: VersionSync = {

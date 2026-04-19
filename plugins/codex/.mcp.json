@@ -2,7 +2,7 @@
   "mcpServers": {
     "mymir": {
       "type": "http",
-      "url": "${MYMIR_URL:-http://localhost:3000}/api/mcp"
+      "url": "http://localhost:3000/api/mcp"
     }
   }
 }

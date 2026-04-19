@@ -117,8 +117,6 @@ bun run dev
 
 Mymir ships as three standalone plugin/extension dirs — one per supported CLI under `plugins/<cli>/`. Each is vendor-native; pick the one that matches your tool.
 
-> **Migrating from an earlier install?** The plugin layout changed to `./plugins/<cli>`. In Claude Code run `claude plugin marketplace remove mymir-local` once before the new install below.
-
 ### Claude Code plugin
 
 Make sure the dev server is running, then:
@@ -144,22 +142,15 @@ Installed components:
 
 ### Codex CLI
 
-Wire the MCP server and trigger OAuth:
+Make sure the dev server is running, then add the local Codex marketplace:
 
 ```bash
-codex mcp add mymir --url http://localhost:3000/api/mcp
+codex marketplace add ./plugins
 ```
 
-A browser window opens for sign-in. Tokens are cached for future sessions.
+Open Codex, run `/plugin`, search for **Mymir**, select it, install it, then restart Codex.
 
-Then symlink the Codex plugin dir so the `mymir`, `brainstorm`, and `decompose` skills auto-activate:
-
-```bash
-mkdir -p ~/.codex/plugins
-ln -s $(pwd)/plugins/codex ~/.codex/plugins/mymir
-```
-
-Restart Codex. Skills match by description when you mention tasks, projects, new ideas, or "break this down."
+The plugin loads the Mymir MCP server and the `mymir`, `brainstorm`, and `decompose` skills. Skills match by description when you mention tasks, projects, new ideas, or "break this down." You can also invoke the main skill explicitly with `$mymir`.
 
 ### Gemini CLI
 
