@@ -35,7 +35,7 @@ Responses include `taskRef` (e.g. `MYMR-83`) — use when referring to tasks in 
 
 `category` determines drawer grouping (one per task, defined at project level).
 
-`tags` group tasks across four dimensions (work type, cross-cutting concern, tech, priority). Honor user-specified tags as-is.
+`tags` MUST cover four dimensions on every task: exactly 1 work type (closed: `bug`/`feature`/`refactor`/`docs`/`test`/`chore`/`perf`), ≥1 cross-cutting concern (open: quality attribute or feature cluster), at most 2 tech tags (most important stack pieces the task touches), exactly 1 priority (closed: `release-blocker`/`core`/`normal`/`backlog`). Do NOT tag codebase area (`category` covers that) or status. Honor user-specified tags as-is.
 
 Task titles: verb+noun format (e.g., "Implement JWT auth", "Fix login redirect").
 
