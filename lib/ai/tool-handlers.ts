@@ -159,13 +159,8 @@ export const DESCRIPTIONS = {
     "Always 'list' then 'select' at session start. Always pass projectId explicitly on every call.",
   mymir_task:
     "Create, update, delete, or reorder tasks. " +
-    "Tasks are concrete work items with status lifecycle: draft → planned → in_progress → done. " +
-    "Lifecycle expectations: " +
-    "'draft' = spec not yet planned; " +
-    "'planned' = has implementationPlan, ready to claim; " +
-    "'in_progress' = actively being worked on (fetch mymir_context depth='agent' right after claiming); " +
-    "'done' = completed with executionRecord, decisions, and files populated so downstream tasks get useful context. " +
-    "Before transitioning to 'done' the agent should confirm with the user (single-agent) or return to the orchestrator (dispatched) — see the skill's Completion Protocol. " +
+    "Status lifecycle: draft → planned → in_progress → done (see `status` field for per-state expectations). " +
+    "Before marking done, follow the skill's Completion Protocol. " +
     "For delete: preview defaults to true (shows impact without deleting). Set preview=false to execute. " +
     "Update accepts any combination of fields — pass only what changed. " +
     "Array fields (decisions, acceptanceCriteria, files) APPEND by default. Set overwriteArrays=true to replace entirely.",

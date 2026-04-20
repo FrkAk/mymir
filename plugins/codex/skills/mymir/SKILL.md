@@ -125,9 +125,7 @@ All other project management (status, next task, refine, continue, mark done) is
    - `executionRecord`: 3-5 sentences — what was built, approach, concrete details (function names, file paths, endpoints). No debugging stories.
    - `decisions`: one-liner per key technical choice (CHOICE + WHY)
    - `files`: every file created or modified
-5. **Confirm before marking done** — protocol depends on invoker (see Completion Protocol):
-   - **Direct user invocation**: ask "Ready to mark done?" with a one-sentence executionRecord preview. Wait for confirmation.
-   - **Dispatched sub-agent**: skip the ask — orchestrator reviews after. Return the task ref to the parent.
+5. **Confirm before marking done** — follow the Completion Protocol (single-agent asks; dispatched skips).
 6. `mymir_task` `action='update'` `status='done'` `executionRecord='...'` `decisions=[...]` `files=[...]` — read and follow any `_hints` returned about missing fields.
 7. Run **Propagate Changes** on the completed task
 
@@ -156,7 +154,7 @@ Stay concise — same density as before, just use markdown structure so the UI r
    - **User described what they did**: extract executionRecord, decisions, files from conversation
    - **User just said "done"**: ask what was built, key decisions, files touched
    - **Coding agent reported back**: summarize the agent's work into executionRecord
-4. **Confirm before transitioning** (single-agent mode): show the user the proposed executionRecord + decisions + files and wait for confirmation. In multi-agent mode, skip this step.
+4. **Confirm before transitioning** — follow the Completion Protocol.
 5. `mymir_task` `action='update'` with `status='done'`, `executionRecord`, `decisions`, `files` — **all three expected, all in markdown format**. Read and follow any `_hints` returned about missing fields.
 6. Run **Propagate Changes** on the completed task
 7. Report what was unlocked: `mymir_analyze type='ready'`
