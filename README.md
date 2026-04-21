@@ -1,6 +1,18 @@
 ![Mymir](assets/mymir-logo.png)
 > Context management for the agent-native engineering era.
 
+<p align="center">
+  <a href="#claude-code"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-D97757?style=flat-square&logo=anthropic&logoColor=white" /></a>
+  &nbsp;&nbsp;
+  <a href="#codex"><img alt="Codex" src="https://img.shields.io/badge/Codex-000000?style=flat-square&logo=openai&logoColor=white" /></a>
+  &nbsp;&nbsp;
+  <a href="#gemini"><img alt="Gemini CLI" src="https://img.shields.io/badge/Gemini_CLI-4285F4?style=flat-square&logo=googlegemini&logoColor=white" /></a>
+</p>
+
+<p align="center">
+  <video src="assets/mymir-demo.mp4" autoplay loop muted playsinline width="900"></video>
+</p>
+
 Most of us aren't really writing code anymore, we're directing agents that do. But those agents have no memory. Every session starts from zero, and engineers end up spending their time re-explaining what was built, why decisions were made, and what still needs to happen. That's not engineering, that's babysitting.
 
 Mymir replaces that cycle. It's not just a context layer your agents read from, it's an end-to-end project management tool that agents operate natively. Mymir creates tasks, refines them, plans implementations, provides the right context at the right stage, and tracks everything that happens. Your agent harness doesn't need a briefing. It walks into every session knowing exactly what to do next and why.
