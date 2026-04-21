@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <video src="assets/mymir-demo.mp4" autoplay loop muted playsinline width="900"></video>
+  <video src="https://github.com/user-attachments/assets/828e28d5-3573-4cbe-aa29-bae488961b7d" autoplay loop muted playsinline width="900"></video>
 </p>
 
 Most of us aren't really writing code anymore, we're directing agents that do. But those agents have no memory. Every session starts from zero, and engineers end up spending their time re-explaining what was built, why decisions were made, and what still needs to happen. That's not engineering, that's babysitting.
