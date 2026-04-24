@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import { updateProjectSettings } from '@/lib/actions/project';
+import { AutoGrowTextarea } from '@/components/shared/AutoGrowTextarea';
+import { Markdown } from '@/components/shared/Markdown';
 
 interface DescriptionSectionProps {
   projectId: string;
@@ -47,7 +49,7 @@ export function DescriptionSection({ projectId, initialDescription, onUpdated }:
     <section className="space-y-1.5">
       <label className={SECTION_LABEL_CLASS}>Description</label>
       {editing ? (
-        <textarea
+        <AutoGrowTextarea
           value={value}
           rows={3}
           onChange={(e) => setValue(e.target.value)}
@@ -59,13 +61,21 @@ export function DescriptionSection({ projectId, initialDescription, onUpdated }:
           className="w-full resize-none rounded-lg border border-border-strong bg-base px-3 py-2 text-sm text-text-secondary outline-none transition-colors focus:border-accent"
         />
       ) : (
-        <button
-          type="button"
+        <div
           onClick={() => setEditing(true)}
-          className="block w-full cursor-pointer rounded-lg border border-transparent px-3 py-2 text-left text-sm text-text-secondary transition-colors hover:border-border hover:bg-surface-hover/40"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setEditing(true); }
+          }}
+          className="cursor-pointer rounded-lg border border-transparent px-3 py-2 text-sm text-text-secondary transition-colors hover:border-border hover:bg-surface-hover/40"
         >
-          {value || <span className="text-text-muted">Add a description…</span>}
-        </button>
+          {value ? (
+            <Markdown variant="spec">{value}</Markdown>
+          ) : (
+            <span className="text-text-muted">Add a description…</span>
+          )}
+        </div>
       )}
       {serverError && (
         <p className="font-mono text-[10px] text-danger">{serverError}</p>

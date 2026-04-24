@@ -5,6 +5,8 @@ import type { InputEvent as ReactInputEvent, TextareaHTMLAttributes } from 'reac
 
 type AutoGrowTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
 
+const DEFAULT_MAX_HEIGHT_PX = 256;
+
 /**
  * Textarea that auto-resizes to fit its content. Works with controlled (`value`) and uncontrolled (`defaultValue`) usage.
  * @param props - Standard textarea HTML attributes.
@@ -17,7 +19,11 @@ export function AutoGrowTextarea({ onInput, ...rest }: AutoGrowTextareaProps) {
     const el = ref.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    const cssMax = parseFloat(getComputedStyle(el).maxHeight);
+    const cap = Number.isFinite(cssMax) ? cssMax : DEFAULT_MAX_HEIGHT_PX;
+    const target = Math.min(el.scrollHeight, cap);
+    el.style.height = `${target}px`;
+    el.style.overflowY = el.scrollHeight > target ? 'auto' : 'hidden';
   };
 
   useEffect(() => {
