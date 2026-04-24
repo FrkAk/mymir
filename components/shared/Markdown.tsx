@@ -1,6 +1,6 @@
 'use client';
 
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 
@@ -11,6 +11,26 @@ const schema = {
     code: [...(defaultSchema.attributes?.code ?? []), 'className'],
     pre: [...(defaultSchema.attributes?.pre ?? []), 'className'],
     a: [...(defaultSchema.attributes?.a ?? []), 'target', 'rel'],
+  },
+};
+
+const EXTERNAL_URL = /^https?:\/\//i;
+
+const components: Components = {
+  a({ href, target, rel, children }) {
+    const external = typeof href === 'string' && EXTERNAL_URL.test(href);
+    if (external) {
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {children}
+        </a>
+      );
+    }
+    return (
+      <a href={href} target={target} rel={rel}>
+        {children}
+      </a>
+    );
   },
 };
 
@@ -33,7 +53,11 @@ export function Markdown({ children, variant = 'spec', className = '' }: Markdow
   const wrapperClass = className ? `${variantClass} ${className}` : variantClass;
   return (
     <div className={wrapperClass}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[[rehypeSanitize, schema]]}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[[rehypeSanitize, schema]]}
+        components={components}
+      >
         {children}
       </ReactMarkdown>
     </div>

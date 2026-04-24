@@ -11,7 +11,6 @@ import {
 } from "@/lib/graph/queries";
 import { asIdentifier, composeTaskRef } from "@/lib/graph/identifier";
 import { section, formatCriteria, formatDecisions } from "./format";
-import { formatMarkdown } from "@/lib/markdown/format";
 
 /**
  * Build lean, position-optimized context for external coding agents.
@@ -156,6 +155,5 @@ export async function buildAgentContext(taskId: string): Promise<string> {
     }
   }
 
-  const assembled = parts.join("\n\n");
-  return (await formatMarkdown(assembled)) ?? assembled;
+  return parts.join("\n\n");
 }

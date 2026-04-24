@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { TextareaHTMLAttributes, InputEvent as ReactInputEvent } from 'react';
+import type { InputEvent as ReactInputEvent, TextareaHTMLAttributes } from 'react';
 
 type AutoGrowTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
 
@@ -10,7 +10,7 @@ type AutoGrowTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
  * @param props - Standard textarea HTML attributes.
  * @returns A textarea element sized to its content.
  */
-export function AutoGrowTextarea({ value, defaultValue, onInput, ...rest }: AutoGrowTextareaProps) {
+export function AutoGrowTextarea({ onInput, ...rest }: AutoGrowTextareaProps) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
 
   const resize = () => {
@@ -22,22 +22,14 @@ export function AutoGrowTextarea({ value, defaultValue, onInput, ...rest }: Auto
 
   useEffect(() => {
     resize();
-  }, [value, defaultValue]);
+  }, []);
 
   const handleInput = (e: ReactInputEvent<HTMLTextAreaElement>) => {
     resize();
     onInput?.(e);
   };
 
-  return (
-    <textarea
-      ref={ref}
-      value={value}
-      defaultValue={defaultValue}
-      onInput={handleInput}
-      {...rest}
-    />
-  );
+  return <textarea ref={ref} onInput={handleInput} {...rest} />;
 }
 
 export default AutoGrowTextarea;
