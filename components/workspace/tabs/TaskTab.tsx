@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import type { UIMessage } from 'ai';
@@ -777,6 +778,8 @@ function RelationshipsSection({
   const searchRef = useRef<HTMLInputElement>(null);
   const noteRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const portalRef = useRef<HTMLDivElement>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
   // Reset form when task changes
   useEffect(() => { setAdding(false); setError(null); }, [taskId]);
@@ -787,21 +790,44 @@ function RelationshipsSection({
   // Focus note input when target is selected
   useEffect(() => { if (selectedTarget) noteRef.current?.focus(); }, [selectedTarget]);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (selectedTarget || !search) return;
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setSearch('');
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [selectedTarget, search]);
-
   const connectedIds = new Set(edges.map((e) => e.sourceTaskId === taskId ? e.targetTaskId : e.sourceTaskId));
 
   const candidates = Array.from(taskMap.entries())
     .filter(([id]) => id !== taskId && !connectedIds.has(id))
     .filter(([, t]) => !search || t.title.toLowerCase().includes(search.toLowerCase()));
+
+  const dropdownOpen = adding && !selectedTarget && search.length > 0;
+
+  // Track the search input's screen rect while the dropdown is open so the
+  // portal can position itself outside any overflow:hidden ancestors.
+  useLayoutEffect(() => {
+    if (!dropdownOpen) { setAnchorRect(null); return; }
+    const update = () => {
+      const rect = searchRef.current?.getBoundingClientRect();
+      if (rect) setAnchorRect(rect);
+    };
+    update();
+    window.addEventListener('resize', update);
+    // Capture=true so scrolls inside overflow containers (e.g. DetailPanel) fire.
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [dropdownOpen, candidates.length]);
+
+  // Close dropdown on outside click — check both the input wrapper and the portal.
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      const inAnchor = dropdownRef.current?.contains(target);
+      const inPortal = portalRef.current?.contains(target);
+      if (!inAnchor && !inPortal) setSearch('');
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [dropdownOpen]);
 
   const resetForm = () => {
     setAdding(false);
@@ -934,25 +960,35 @@ function RelationshipsSection({
                 placeholder="Search tasks..."
                 className="w-full rounded-md border border-border-strong bg-surface px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-accent"
               />
-              {/* Dropdown */}
-              {!selectedTarget && search && candidates.length > 0 && (
-                <div className="absolute inset-x-0 top-full z-10 mt-1 max-h-[140px] overflow-y-auto rounded-lg border border-border bg-surface shadow-[var(--shadow-float)]">
-                  {candidates.slice(0, 8).map(([id, t]) => (
-                    <button
-                      key={id}
-                      onClick={() => { setSelectedTarget(id); setSearch(''); setError(null); }}
-                      className="flex w-full cursor-pointer items-center gap-2 px-2.5 py-2 text-left text-xs transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-surface-hover"
-                    >
-                      <span className="min-w-0 truncate text-text-secondary">{t.title}</span>
-                      <Badge status={t.status} className="ml-auto shrink-0 scale-75 opacity-50" />
-                    </button>
-                  ))}
-                </div>
-              )}
-              {!selectedTarget && search && candidates.length === 0 && (
-                <div className="absolute inset-x-0 top-full z-10 mt-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-[11px] text-text-muted shadow-[var(--shadow-float)]">
-                  No matching tasks
-                </div>
+              {/* Dropdown — rendered in a portal so it escapes overflow:hidden ancestors */}
+              {dropdownOpen && anchorRect && typeof window !== 'undefined' && createPortal(
+                <div
+                  ref={portalRef}
+                  style={{
+                    position: 'fixed',
+                    left: anchorRect.left,
+                    top: anchorRect.bottom + 4,
+                    width: anchorRect.width,
+                    zIndex: 50,
+                  }}
+                  className="max-h-[140px] overflow-y-auto rounded-lg border border-border bg-surface shadow-[var(--shadow-float)]"
+                >
+                  {candidates.length > 0 ? (
+                    candidates.slice(0, 8).map(([id, t]) => (
+                      <button
+                        key={id}
+                        onClick={() => { setSelectedTarget(id); setSearch(''); setError(null); }}
+                        className="flex w-full cursor-pointer items-center gap-2 px-2.5 py-2 text-left text-xs transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-surface-hover"
+                      >
+                        <span className="min-w-0 truncate text-text-secondary">{t.title}</span>
+                        <Badge status={t.status} className="ml-auto shrink-0 scale-75 opacity-50" />
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-2.5 py-2 text-[11px] text-text-muted">No matching tasks</div>
+                  )}
+                </div>,
+                document.body,
               )}
             </div>
 
