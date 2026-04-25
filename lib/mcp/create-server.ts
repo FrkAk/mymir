@@ -345,7 +345,7 @@ export function registerAllTools(server: McpServer): void {
  */
 export function createMcpServer(): McpServer {
   const server = new McpServer(
-    { name: "mymir", version: "1.2.2" },
+    { name: "mymir", version: "1.3.1" },
     { instructions: INSTRUCTIONS },
   );
   registerAllTools(server);
