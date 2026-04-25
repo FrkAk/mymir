@@ -286,7 +286,7 @@ export async function handleProject(p: ProjectParams): Promise<ToolResult> {
         const project = await createProject({
           title: p.title,
           description: p.description ?? "",
-          status: p.status,
+          ...(p.status !== undefined && { status: p.status }),
           categories: p.categories,
           identifier: parsedIdentifier,
         });
