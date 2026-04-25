@@ -172,7 +172,7 @@ export const DESCRIPTIONS = {
     "Validates against self-edges, duplicates, and circular dependencies.",
   mymir_query:
     "Search and browse project data. " +
-    "'search': find tasks by name or tags (case-insensitive, up to 20 results). " +
+    "'search': find tasks by taskRef, title, or tag substring (case-insensitive, up to 20 results); pass `tags` to filter by exact tag (OR-within), combine with `query` to narrow further. " +
     "'list': all tasks ordered by position. " +
     "'edges': all relationships on a task with connected task title, status, direction, and note. " +
     "'overview': full project structure — all tasks, dependencies, and progress stats.",
@@ -242,6 +242,7 @@ export type QueryParams = {
   type: "search" | "list" | "edges" | "overview";
   projectId?: string;
   query?: string;
+  tags?: string[];
   taskId?: string;
 };
 
@@ -516,12 +517,24 @@ export async function handleQuery(p: QueryParams): Promise<ToolResult> {
   try {
     switch (p.type) {
       case "search": {
-        if (!p.query) return fail("query string required for search");
         if (!p.projectId) return fail("projectId required for search");
+        const hasQuery = (p.query?.trim() ?? "").length > 0;
+        const tagFilter = p.tags?.filter((t) => t.length > 0) ?? [];
+        if (!hasQuery && tagFilter.length === 0) {
+          return fail("query or tags required for search");
+        }
         const notFound = await requireProject(p.projectId);
         if (notFound) return notFound;
-        const results = await searchTasks(p.projectId, p.query);
-        const hint = results.length === 1 ? stateHint(results[0].state) : undefined;
+
+        const variantHints =
+          tagFilter.length > 0
+            ? tagVariantHints(tagFilter, (await getProjectTags(p.projectId)).map((t) => t.tag))
+            : [];
+
+        const results = await searchTasks(p.projectId, p.query, tagFilter);
+        const hintParts: string[] = [...variantHints];
+        if (results.length === 1) hintParts.push(stateHint(results[0].state));
+        const hint = hintParts.length > 0 ? hintParts.join("\n> ") : undefined;
         return ok(formatSearchResults(results, hint));
       }
       case "list": {
