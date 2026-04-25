@@ -400,6 +400,15 @@ export type SearchResult = {
 const TASK_REF_PATTERN = /^([A-Z0-9]+)-(\d+)$/i;
 
 /**
+ * Trim each tag and drop empty entries.
+ * @param tags - Raw tag strings (may be undefined).
+ * @returns Normalized non-empty tag list.
+ */
+export function normalizeTags(tags?: string[]): string[] {
+  return tags?.map((t) => t.trim()).filter((t) => t.length > 0) ?? [];
+}
+
+/**
  * Search tasks by taskRef, title, or tags within a project.
  *
  * `query` matches taskRef, title substring, or tag substring (case-insensitive).
@@ -424,7 +433,7 @@ export async function searchTasks(
   if (!proj) return [];
 
   const trimmedQuery = query?.trim() ?? "";
-  const tagFilter = tags?.filter((t) => t.length > 0) ?? [];
+  const tagFilter = normalizeTags(tags);
   if (trimmedQuery.length === 0 && tagFilter.length === 0) return [];
 
   const clauses = [eq(tasks.projectId, projectId)];
@@ -438,7 +447,8 @@ export async function searchTasks(
 
     const pattern = `%${trimmedQuery}%`;
     const tagSubstring = sql`EXISTS (SELECT 1 FROM jsonb_array_elements_text(${tasks.tags}) AS t WHERE t ILIKE ${pattern})`;
-    clauses.push(seqClause ?? or(ilike(tasks.title, pattern), tagSubstring)!);
+    const queryClause = seqClause ?? or(ilike(tasks.title, pattern), tagSubstring);
+    if (queryClause) clauses.push(queryClause);
   }
 
   if (tagFilter.length > 0) {

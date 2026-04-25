@@ -27,6 +27,7 @@ import {
   projectExists,
   taskExists,
   edgeExists,
+  normalizeTags,
 } from "@/lib/graph/queries";
 import type { TaskState } from "@/lib/graph/queries";
 import { buildProjectOverview } from "@/lib/context/overview";
@@ -519,7 +520,7 @@ export async function handleQuery(p: QueryParams): Promise<ToolResult> {
       case "search": {
         if (!p.projectId) return fail("projectId required for search");
         const hasQuery = (p.query?.trim() ?? "").length > 0;
-        const tagFilter = p.tags?.filter((t) => t.length > 0) ?? [];
+        const tagFilter = normalizeTags(p.tags);
         if (!hasQuery && tagFilter.length === 0) {
           return fail("query or tags required for search");
         }
