@@ -90,9 +90,10 @@ export function formatSummary(ctx: SummaryContext): string {
  * @returns Formatted text with one result per line.
  */
 export function formatSearchResults(results: SearchResult[], hint?: string): string {
-  if (results.length === 0) return "No results found.";
-
-  const parts: string[] = [`Found ${results.length} result${results.length > 1 ? "s" : ""}:`];
+  const parts: string[] =
+    results.length === 0
+      ? ["No results found."]
+      : [`Found ${results.length} result${results.length > 1 ? "s" : ""}:`];
   for (const r of results) {
     let line = `- \`${r.taskRef}\` "${r.title}" [${r.status}|${r.state}] \`${r.id}\``;
     if (r.category) line += ` | ${r.category}`;

@@ -225,6 +225,9 @@ Stay concise — same density as before, just use markdown structure so the UI r
    - `ready` → `depth='agent'`
    - `blocked` / `done` / `in_progress` / `draft` → `depth='working'`
 
+### Filter tasks by tag
+Pass `tags=['<tag>', ...]` to `mymir_query` `type='search'` for an exact, OR-within tag filter — combine with `query` to narrow by name. Pick tags from the Tag vocabulary line in `type='overview'`.
+
 ### Review edge quality
 1. `mymir_query` `type='list'` → all tasks
 2. For tasks with many connections: `mymir_query` `type='edges'` → check each edge has a note and correct type

@@ -10,6 +10,7 @@ import {
 } from "@/lib/db/schema";
 import type { EdgeType } from "@/lib/types";
 import { asIdentifier, composeTaskRef, enrichWithTaskRef } from "./identifier";
+import { normalizeTags } from "@/lib/ai/tag-similarity";
 
 // ---------------------------------------------------------------------------
 // Task helpers
@@ -400,19 +401,22 @@ export type SearchResult = {
 const TASK_REF_PATTERN = /^([A-Z0-9]+)-(\d+)$/i;
 
 /**
- * Search tasks by taskRef, title, or tags (case-insensitive) within a project.
+ * Search tasks by taskRef, title, or tags within a project.
  *
- * When the query is a full taskRef (`<identifier>-<sequenceNumber>`) and the
- * prefix matches the project's identifier, returns the task with that sequence
- * number. Otherwise falls back to title + tag search.
+ * `query` matches taskRef, title substring, or tag substring (case-insensitive).
+ * `tags` filters to tasks containing ANY of the listed tags (OR-within, exact
+ * match). When both are passed, results must satisfy both (AND between).
+ * At least one of `query` or `tags` must be non-empty.
  *
  * @param projectId - UUID of the project.
- * @param query - Search string. Accepts taskRef, title fragment, or tag value.
- * @returns Up to 20 matching tasks with derived state, title matches ranked first.
+ * @param query - Optional search string. Accepts taskRef, title fragment, or tag value.
+ * @param tags - Optional exact tag filter (OR-within).
+ * @returns Up to 20 matching tasks with derived state. When `query` is present, title matches rank first; otherwise ordered by `order`.
  */
 export async function searchTasks(
   projectId: string,
-  query: string,
+  query?: string,
+  tags?: string[],
 ): Promise<SearchResult[]> {
   const [proj] = await db
     .select({ identifier: projects.identifier })
@@ -420,17 +424,30 @@ export async function searchTasks(
     .where(eq(projects.id, projectId));
   if (!proj) return [];
 
-  const trimmedQuery = query.trim();
-  const refMatch = trimmedQuery.match(TASK_REF_PATTERN);
-  const seqClause =
-    refMatch && refMatch[1].toUpperCase() === proj.identifier
-      ? eq(tasks.sequenceNumber, Number(refMatch[2]))
-      : null;
+  const trimmedQuery = query?.trim() ?? "";
+  const tagFilter = normalizeTags(tags);
+  if (trimmedQuery.length === 0 && tagFilter.length === 0) return [];
 
-  const pattern = `%${query}%`;
-  const lower = query.toLowerCase();
-  const tagMatch = sql`EXISTS (SELECT 1 FROM jsonb_array_elements_text(${tasks.tags}) AS t WHERE t ILIKE ${pattern})`;
-  const searchClause = seqClause ?? or(ilike(tasks.title, pattern), tagMatch);
+  const clauses = [eq(tasks.projectId, projectId)];
+
+  if (trimmedQuery.length > 0) {
+    const refMatch = trimmedQuery.match(TASK_REF_PATTERN);
+    const seqClause =
+      refMatch && refMatch[1].toUpperCase() === proj.identifier
+        ? eq(tasks.sequenceNumber, Number(refMatch[2]))
+        : null;
+
+    const pattern = `%${trimmedQuery}%`;
+    const tagSubstring = sql`EXISTS (SELECT 1 FROM jsonb_array_elements_text(${tasks.tags}) AS t WHERE t ILIKE ${pattern})`;
+    const queryClause = seqClause ?? or(ilike(tasks.title, pattern), tagSubstring);
+    if (queryClause) clauses.push(queryClause);
+  }
+
+  if (tagFilter.length > 0) {
+    clauses.push(
+      sql`EXISTS (SELECT 1 FROM jsonb_array_elements_text(${tasks.tags}) AS t WHERE t IN ${tagFilter})`,
+    );
+  }
 
   const matchingTasks = await db
     .select({
@@ -442,17 +459,23 @@ export async function searchTasks(
       description: tasks.description,
       acceptanceCriteria: tasks.acceptanceCriteria,
       sequenceNumber: tasks.sequenceNumber,
+      order: tasks.order,
     })
     .from(tasks)
-    .where(and(eq(tasks.projectId, projectId), searchClause));
+    .where(and(...clauses));
 
-  matchingTasks.sort((a, b) => {
-    const aLower = a.title.toLowerCase();
-    const bLower = b.title.toLowerCase();
-    const aTitle = aLower === lower ? 0 : aLower.startsWith(lower) ? 1 : aLower.includes(lower) ? 2 : 3;
-    const bTitle = bLower === lower ? 0 : bLower.startsWith(lower) ? 1 : bLower.includes(lower) ? 2 : 3;
-    return aTitle - bTitle;
-  });
+  if (trimmedQuery.length > 0) {
+    const lower = trimmedQuery.toLowerCase();
+    matchingTasks.sort((a, b) => {
+      const aLower = a.title.toLowerCase();
+      const bLower = b.title.toLowerCase();
+      const aTitle = aLower === lower ? 0 : aLower.startsWith(lower) ? 1 : aLower.includes(lower) ? 2 : 3;
+      const bTitle = bLower === lower ? 0 : bLower.startsWith(lower) ? 1 : bLower.includes(lower) ? 2 : 3;
+      return aTitle - bTitle;
+    });
+  } else {
+    matchingTasks.sort((a, b) => a.order - b.order);
+  }
 
   const trimmed = matchingTasks.slice(0, 20);
   const stateMap = await deriveTaskStates(projectId, trimmed);

@@ -138,8 +138,9 @@ export function decomposeTools(projectId: string) {
     mymir_query: tool({
       description: DESCRIPTIONS.mymir_query,
       inputSchema: z.object({
-        type: z.enum(["search", "overview"]).describe("search=find by name or tag, overview=project structure"),
-        query: z.string().optional().describe("Search string for type='search'"),
+        type: z.enum(["search", "overview"]).describe("search=find by taskRef, name, or tag, overview=project structure"),
+        query: z.string().optional().describe("Search string for type='search' — matches taskRef, title substring, or tag substring. Optional when `tags` is provided."),
+        tags: z.array(z.string()).optional().describe("Filter to tasks containing ANY of these exact tags (OR-within). Combine with `query` to narrow further. Pick from the Tag vocabulary in `mymir_query type='overview'`."),
         taskId: z.string().optional().describe("Task UUID for type='edges'"),
       }),
       execute: async (params) =>
@@ -203,8 +204,9 @@ export function refineScopedTools(taskId: string, projectId: string) {
     mymir_query: tool({
       description: DESCRIPTIONS.mymir_query,
       inputSchema: z.object({
-        type: z.enum(["search", "edges", "overview"]).describe("search=find by name or tag, edges=task relationships, overview=project structure"),
-        query: z.string().optional().describe("Search string for type='search'"),
+        type: z.enum(["search", "edges", "overview"]).describe("search=find by taskRef, name, or tag, edges=task relationships, overview=project structure"),
+        query: z.string().optional().describe("Search string for type='search' — matches taskRef, title substring, or tag substring. Optional when `tags` is provided."),
+        tags: z.array(z.string()).optional().describe("Filter to tasks containing ANY of these exact tags (OR-within). Combine with `query` to narrow further. Pick from the Tag vocabulary in `mymir_query type='overview'`."),
         taskId: z.string().optional().describe("Task UUID for type='edges'"),
       }),
       execute: async (params) =>
@@ -276,8 +278,9 @@ export function allTools(projectId: string) {
     mymir_query: tool({
       description: DESCRIPTIONS.mymir_query,
       inputSchema: z.object({
-        type: z.enum(["search", "list", "edges", "overview"]).describe("search=find by name or tag, list=all tasks, edges=task relationships, overview=project structure"),
-        query: z.string().optional().describe("Search string for type='search'"),
+        type: z.enum(["search", "list", "edges", "overview"]).describe("search=find by taskRef, name, or tag, list=all tasks, edges=task relationships, overview=project structure"),
+        query: z.string().optional().describe("Search string for type='search' — matches taskRef, title substring, or tag substring. Optional when `tags` is provided."),
+        tags: z.array(z.string()).optional().describe("Filter to tasks containing ANY of these exact tags (OR-within). Combine with `query` to narrow further. Pick from the Tag vocabulary in `mymir_query type='overview'`."),
         taskId: z.string().optional().describe("Task UUID for type='edges'"),
       }),
       execute: async (params) =>
