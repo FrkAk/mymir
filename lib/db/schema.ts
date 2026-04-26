@@ -3,6 +3,7 @@ import {
   uuid,
   text,
   integer,
+  boolean,
   timestamp,
   jsonb,
   index,
@@ -130,3 +131,50 @@ export const conversations = pgTable(
 
 export type Conversation = typeof conversations.$inferSelect;
 export type NewConversation = typeof conversations.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Task Links (GitHub PRs)
+// ---------------------------------------------------------------------------
+
+export const taskLinks = pgTable(
+  "task_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    taskId: uuid("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    title: text("title").notNull(),
+    number: integer("number").notNull(),
+    state: text("state").notNull(),
+    isPrimary: boolean("is_primary").notNull().default(false),
+    prId: integer("pr_id").notNull(),
+    repoFullName: text("repo_full_name").notNull(),
+    previousTaskStatus: text("previous_task_status").$type<TaskStatus>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("task_links_task_id_idx").on(t.taskId),
+    unique("task_links_pr_task_unique").on(t.prId, t.taskId),
+  ],
+);
+
+export type TaskLink = typeof taskLinks.$inferSelect;
+export type NewTaskLink = typeof taskLinks.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// GitHub Config (single-row preferences for PR polling)
+// ---------------------------------------------------------------------------
+
+export const githubConfig = pgTable("github_config", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  watchedRepos: jsonb("watched_repos").$type<string[]>().notNull().default([]),
+  lastPolledAt: timestamp("last_polled_at", { withTimezone: true }),
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type GitHubConfig = typeof githubConfig.$inferSelect;
+export type NewGitHubConfig = typeof githubConfig.$inferInsert;

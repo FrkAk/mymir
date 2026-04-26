@@ -259,6 +259,20 @@ export default function SettingsPage() {
 
         <div className="mt-6">
           <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
+            Integrations
+          </p>
+          <Link
+            href="/settings/integrations/github"
+            className="inline-flex items-center gap-1 text-sm text-text-secondary transition-colors hover:text-text-primary"
+          >
+            GitHub &rarr;
+          </Link>
+        </div>
+
+        <div className="mt-8 h-px bg-gradient-to-r from-accent/20 via-accent/5 to-transparent" />
+
+        <div className="mt-6">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-2">
             Note
           </p>
           <p className="text-xs text-text-secondary">
