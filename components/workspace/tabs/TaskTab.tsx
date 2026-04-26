@@ -150,8 +150,8 @@ export function TaskTab({
   useEffect(() => {
     if (Date.now() - lastCriteriaMutationRef.current < 1000) return;
     const incoming = normalizeCriteria(acceptanceCriteria);
-    const currentIds = localCriteriaRef.current.map((c) => c.id + c.checked + c.text).join('|');
-    const incomingIds = incoming.map((c) => c.id + c.checked + c.text).join('|');
+    const currentIds = localCriteriaRef.current.map((c) => c.checked + '|' + c.text).join('||');
+    const incomingIds = incoming.map((c) => c.checked + '|' + c.text).join('||');
     if (currentIds !== incomingIds) setLocalCriteria(incoming);
   }, [acceptanceCriteria]);
   useEffect(() => { setDesc(description); }, [description]);
@@ -160,8 +160,8 @@ export function TaskTab({
   useEffect(() => {
     if (Date.now() - lastDecisionMutationRef.current < 1000) return;
     const incoming = normalizeDecisions(decisions);
-    const currentIds = localDecisionsRef.current.map((d) => d.id + d.text).join('|');
-    const incomingIds = incoming.map((d) => d.id + d.text).join('|');
+    const currentIds = localDecisionsRef.current.map((d) => d.text).join('||');
+    const incomingIds = incoming.map((d) => d.text).join('||');
     if (currentIds !== incomingIds) setLocalDecisions(incoming);
   }, [decisions]);
 
