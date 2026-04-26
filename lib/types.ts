@@ -52,7 +52,7 @@ export type HistoryEntry = {
   date: string;
   label: string;
   description: string;
-  actor: "user" | "ai";
+  actor: "user" | "ai" | "system";
 };
 
 /** A verifiable acceptance criterion for a task. */
