@@ -20,6 +20,42 @@ import type { TaskEdge } from '@/lib/db/schema';
 import type { AcceptanceCriterion, Decision } from '@/lib/types';
 
 /**
+ * Strip duplicate ids and mint missing ids on a criteria array.
+ * @param items - Criteria from props (may be undefined, contain legacy items without ids, or duplicates).
+ * @returns Normalized criteria with unique, non-empty ids preserving original order.
+ */
+function normalizeCriteria(items: AcceptanceCriterion[] | undefined | null): AcceptanceCriterion[] {
+  if (!items?.length) return [];
+  const seen = new Set<string>();
+  const out: AcceptanceCriterion[] = [];
+  for (const c of items) {
+    const id = c.id ?? crypto.randomUUID();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(c.id ? c : { ...c, id });
+  }
+  return out;
+}
+
+/**
+ * Strip duplicate ids and mint missing ids on a decisions array.
+ * @param items - Decisions from props (may be undefined, contain legacy items without ids, or duplicates).
+ * @returns Normalized decisions with unique, non-empty ids preserving original order.
+ */
+function normalizeDecisions(items: Decision[] | undefined | null): Decision[] {
+  if (!items?.length) return [];
+  const seen = new Set<string>();
+  const out: Decision[] = [];
+  for (const d of items) {
+    const id = d.id ?? crypto.randomUUID();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(d.id ? d : { ...d, id });
+  }
+  return out;
+}
+
+/**
  * Fetches persisted task chat history, deduped across concurrent callers.
  * @param projectId - Project UUID.
  * @param taskId - Task UUID.
@@ -81,12 +117,12 @@ export function TaskTab({
 }: TaskTabProps) {
   const [desc, setDesc] = useState(description);
   const [editingDesc, setEditingDesc] = useState(false);
-  const [localCriteria, setLocalCriteria] = useState(acceptanceCriteria ?? []);
+  const [localCriteria, setLocalCriteria] = useState(() => normalizeCriteria(acceptanceCriteria));
   const localCriteriaRef = useRef(localCriteria);
   const lastCriteriaMutationRef = useRef(0);
   const [editingCriterionId, setEditingCriterionId] = useState<string | null>(null);
   const [addingCriterion, setAddingCriterion] = useState(false);
-  const [localDecisions, setLocalDecisions] = useState(decisions);
+  const [localDecisions, setLocalDecisions] = useState(() => normalizeDecisions(decisions));
   const localDecisionsRef = useRef(localDecisions);
 
   useEffect(() => { localCriteriaRef.current = localCriteria; }, [localCriteria]);
@@ -113,13 +149,7 @@ export function TaskTab({
   // Suppressed briefly after local mutations to prevent stale SSE refreshes from clobbering optimistic state.
   useEffect(() => {
     if (Date.now() - lastCriteriaMutationRef.current < 1000) return;
-    const raw = acceptanceCriteria ?? [];
-    const seen = new Set<string>();
-    const incoming = raw.filter((c) => {
-      if (seen.has(c.id)) return false;
-      seen.add(c.id);
-      return true;
-    });
+    const incoming = normalizeCriteria(acceptanceCriteria);
     const currentIds = localCriteriaRef.current.map((c) => c.id + c.checked + c.text).join('|');
     const incomingIds = incoming.map((c) => c.id + c.checked + c.text).join('|');
     if (currentIds !== incomingIds) setLocalCriteria(incoming);
@@ -129,9 +159,10 @@ export function TaskTab({
   // Sync decisions from props (same suppression pattern as criteria)
   useEffect(() => {
     if (Date.now() - lastDecisionMutationRef.current < 1000) return;
+    const incoming = normalizeDecisions(decisions);
     const currentIds = localDecisionsRef.current.map((d) => d.id + d.text).join('|');
-    const incomingIds = decisions.map((d) => d.id + d.text).join('|');
-    if (currentIds !== incomingIds) setLocalDecisions(decisions);
+    const incomingIds = incoming.map((d) => d.id + d.text).join('|');
+    if (currentIds !== incomingIds) setLocalDecisions(incoming);
   }, [decisions]);
 
   // Reset editing state when switching nodes
