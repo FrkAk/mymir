@@ -77,14 +77,6 @@ function tagVariantHints(proposed: string[], existing: string[]): string[] {
 }
 
 /**
- * Build hints when a task is cancelled, mirroring `doneStatusHints` so agents
- * see the same shape of guidance: warn when rationale (executionRecord) and
- * decisions are missing, and prompt downstream propagation.
- * @param payload - Fields supplied by the caller in this request.
- * @param persisted - Row state after the mutation (createTask/updateTask result).
- * @returns Hint strings for missing rationale and downstream propagation.
- */
-/**
  * Build warning hints for semantically incoherent terminal-to-terminal
  * status transitions. Currently flags `done → cancelled` (drops the task
  * from progress numerator) and `cancelled → done` (skips the work pipeline).
@@ -109,6 +101,14 @@ function terminalReversalHints(priorStatus: string, nextStatus: string): string[
   return [];
 }
 
+/**
+ * Build hints when a task is cancelled, mirroring `doneStatusHints` so agents
+ * see the same shape of guidance: warn when rationale (executionRecord) and
+ * decisions are missing, and prompt downstream propagation.
+ * @param payload - Fields supplied by the caller in this request.
+ * @param persisted - Row state after the mutation (createTask/updateTask result).
+ * @returns Hint strings for missing rationale and downstream propagation.
+ */
 function cancelledStatusHints(
   payload: {
     executionRecord?: string;
