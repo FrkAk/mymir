@@ -55,7 +55,7 @@ Task titles: verb+noun format (e.g., "Implement JWT auth", "Fix login redirect")
 | Depth | Use when | What it includes |
 |-------|----------|-----------------|
 | `summary` | Quick status check | JSON: status, edge counts |
-| `working` | Refining, discussing, or reviewing a task | Criteria, decisions, edges (1-hop), siblings, conversation history |
+| `working` | Refining, discussing, or reviewing a task | Criteria, decisions, edges (1-hop), siblings |
 | `agent` | Writing code for a task | Implementation plan, upstream execution records, files, "Done Means", downstream |
 | `planning` | Writing an implementation plan | Project description, acceptance criteria, upstream execution records, downstream specs |
 
