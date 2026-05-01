@@ -103,7 +103,13 @@ export function ProjectCard({
     >
       <div className="absolute right-3 top-3">
         {confirming ? (
-          <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
+          <div
+            className="flex items-center gap-1.5"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
             <button
               onClick={handleDelete}
               className="cursor-pointer rounded-md px-2 py-1 text-[10px] font-semibold text-danger transition-colors hover:bg-danger/10"
