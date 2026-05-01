@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ProgressBar } from '@/components/shared/ProgressBar';
-import { GetStartedModal } from '@/components/home/GetStartedModal';
+import { ProjectStatusModal, type CliManagedStatus } from '@/components/home/ProjectStatusModal';
 import { deleteProject } from '@/lib/graph/mutations';
 
 interface ProjectCardProps {
@@ -32,9 +32,18 @@ interface ProjectCardProps {
 }
 
 /**
+ * Check whether a project status is handled by the CLI-only lifecycle modal.
+ * @param status - Project lifecycle status.
+ * @returns True when the status is `brainstorming` or `decomposing`.
+ */
+function isCliManagedStatus(status: string): status is CliManagedStatus {
+  return status === 'brainstorming' || status === 'decomposing';
+}
+
+/**
  * Card displaying a project summary with progress, stats, and delete action.
- * Active projects link into the workspace; non-active projects open the
- * get-started modal so the user knows to continue from their CLI agent.
+ * Workspace-ready projects link into the workspace; CLI-managed projects open
+ * a status modal so the user knows to continue from their CLI agent.
  * @param props - Project data for rendering.
  * @returns A linked or button-wrapped project card element.
  */
@@ -80,6 +89,7 @@ export function ProjectCard({
   }, []);
 
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setModalOpen(true);
@@ -165,7 +175,7 @@ export function ProjectCard({
     </motion.div>
   );
 
-  if (opensWorkspace) {
+  if (opensWorkspace || !isCliManagedStatus(status)) {
     return (
       <Link href={`/project/${id}`} className="block no-underline">
         {body}
@@ -184,7 +194,13 @@ export function ProjectCard({
       >
         {body}
       </div>
-      <GetStartedModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <ProjectStatusModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        status={status}
+        title={title}
+        identifier={identifier}
+      />
     </>
   );
 }

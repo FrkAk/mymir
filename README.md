@@ -81,7 +81,7 @@ Update with `claude plugin update mymir@mymir-local` and restart Claude Code. MC
 ### Codex
 
 ```bash
-codex marketplace add ./plugins
+codex plugin marketplace add ./plugins
 ```
 
 Open Codex, run `/plugin`, search for **Mymir**, install, then restart. Invoke the main skill explicitly with `$mymir` when needed.
