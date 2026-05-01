@@ -39,7 +39,7 @@ const STATUS_CONTENT: Record<CliManagedStatus, StatusContent> = {
     prompt: 'Continue brainstorming the {identifier} project ({title}).',
     unlocks:
       'Decomposition unlocks once the brief is solid; the workspace unlocks once the agent activates the project.',
-    accentClass: 'text-accent border-accent/25 bg-accent/8',
+    accentClass: 'text-accent border-accent/25 bg-accent/15',
   },
   decomposing: {
     modalTitle: 'Structure in progress',
@@ -51,7 +51,7 @@ const STATUS_CONTENT: Record<CliManagedStatus, StatusContent> = {
     prompt: 'Continue decomposing the {identifier} project ({title}).',
     unlocks:
       'When the graph is ready, the agent activates the project, and that opens the workspace.',
-    accentClass: 'text-progress border-progress/25 bg-progress/8',
+    accentClass: 'text-progress border-progress/25 bg-progress/15',
   },
 };
 
@@ -105,7 +105,7 @@ export function ProjectStatusModal({
             <h4 className={SECTION_LABEL_CLASS}>Resume prompt</h4>
             <CopyButton text={promptText} />
           </div>
-          <pre className="overflow-x-auto rounded-md border border-border bg-surface-raised p-3 font-mono text-xs leading-relaxed text-text-primary">
+          <pre className="overflow-x-auto rounded-lg border border-border bg-surface-raised p-3 font-mono text-xs leading-relaxed text-text-primary">
             <code>{promptText}</code>
           </pre>
           <p className="text-xs leading-relaxed text-text-muted">

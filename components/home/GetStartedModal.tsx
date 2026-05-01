@@ -72,7 +72,7 @@ function FirstTimeBody() {
               <h3 className={SECTION_LABEL_CLASS}>{cli.name}</h3>
               <CopyButton text={cli.install} />
             </div>
-            <pre className="overflow-x-auto rounded-md border border-border bg-surface-raised p-3 font-mono text-xs leading-relaxed text-text-primary">
+            <pre className="overflow-x-auto rounded-lg border border-border bg-surface-raised p-3 font-mono text-xs leading-relaxed text-text-primary">
               <code>{cli.install}</code>
             </pre>
             <p className="text-xs leading-relaxed text-text-muted">
