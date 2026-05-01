@@ -324,7 +324,7 @@ export function TaskTab({
                   <path d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L3.463 11.1a.25.25 0 00-.064.108l-.563 1.97 1.971-.564a.25.25 0 00.108-.064l8.609-8.61a.25.25 0 000-.353l-1.097-1.097z" />
                 </svg>
                 {desc ? (
-                  <Markdown variant="spec">{desc}</Markdown>
+                  <Markdown>{desc}</Markdown>
                 ) : (
                   <p className="italic text-text-muted">Click to add description...</p>
                 )}
@@ -372,7 +372,7 @@ export function TaskTab({
                           <svg viewBox="0 0 16 16" fill="currentColor" className="absolute right-2 top-1.5 h-3 w-3 text-text-muted opacity-0 transition-opacity duration-150 group-hover/cedit:opacity-100">
                             <path d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L3.463 11.1a.25.25 0 00-.064.108l-.563 1.97 1.971-.564a.25.25 0 00.108-.064l8.609-8.61a.25.25 0 000-.353l-1.097-1.097z" />
                           </svg>
-                          <Markdown variant="spec">{c.text}</Markdown>
+                          <Markdown>{c.text}</Markdown>
                         </div>
                       )}
                     </div>
@@ -456,7 +456,7 @@ export function TaskTab({
                         <svg viewBox="0 0 16 16" fill="currentColor" className="absolute right-2 top-1.5 h-3 w-3 text-text-muted opacity-0 transition-opacity duration-150 group-hover/dedit:opacity-100">
                           <path d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L3.463 11.1a.25.25 0 00-.064.108l-.563 1.97 1.971-.564a.25.25 0 00.108-.064l8.609-8.61a.25.25 0 000-.353l-1.097-1.097z" />
                         </svg>
-                        <Markdown variant="spec" className="break-words">{d.text}</Markdown>
+                        <Markdown className="break-words">{d.text}</Markdown>
                         <span className="ml-2 font-mono text-[10px] text-text-muted">{d.date}</span>
                       </div>
                     )}
@@ -550,7 +550,7 @@ export function TaskTab({
               <h4 className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-text-muted">
                 Execution Record
               </h4>
-              <Markdown variant="spec" className="text-sm text-text-secondary">{executionRecord}</Markdown>
+              <Markdown className="text-sm text-text-secondary">{executionRecord}</Markdown>
             </section>
           )}
         </div>
@@ -753,7 +753,7 @@ function RelationshipsSection({
                   </button>
                 </div>
                 {e.note && (
-                  <Markdown variant="spec" className="mt-0.5 pl-0.5 text-[11px] leading-tight text-text-muted">{e.note}</Markdown>
+                  <Markdown className="mt-0.5 pl-0.5 text-[11px] leading-tight text-text-muted">{e.note}</Markdown>
                 )}
               </div>
             );

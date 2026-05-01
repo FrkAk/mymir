@@ -71,7 +71,7 @@ export function DescriptionSection({ projectId, initialDescription, onUpdated }:
           className="cursor-pointer rounded-lg border border-transparent px-3 py-2 text-sm text-text-secondary transition-colors hover:border-border hover:bg-surface-hover/40"
         >
           {value ? (
-            <Markdown variant="spec">{value}</Markdown>
+            <Markdown>{value}</Markdown>
           ) : (
             <span className="text-text-muted">Add a description…</span>
           )}

@@ -289,107 +289,8 @@ html.light ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ===========================================
-   CHAT MARKDOWN prose styling
+   SPEC MARKDOWN prose styling
    =========================================== */
-.prose-chat {
-  line-height: 1.65;
-  letter-spacing: 0.012em;
-}
-.prose-chat p {
-  margin: 0 0 0.6em;
-}
-.prose-chat p:last-child {
-  margin-bottom: 0;
-}
-.prose-chat strong {
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-.prose-chat em {
-  color: var(--color-text-secondary);
-}
-.prose-chat ul {
-  list-style-type: disc;
-  margin: 0.5em 0;
-  padding-left: 1.4em;
-}
-.prose-chat ol {
-  list-style-type: decimal;
-  margin: 0.5em 0;
-  padding-left: 1.4em;
-}
-.prose-chat li {
-  margin: 0.25em 0;
-}
-.prose-chat li::marker {
-  color: var(--color-accent);
-}
-.prose-chat code {
-  font-family: var(--font-mono);
-  font-size: 0.85em;
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
-}
-html:not(.light) .prose-chat code {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--color-accent-light);
-}
-html.light .prose-chat code {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--color-accent);
-}
-.prose-chat pre {
-  border-radius: 8px;
-  padding: 0.8em 1em;
-  overflow-x: auto;
-  margin: 0.6em 0;
-}
-html:not(.light) .prose-chat pre {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-html.light .prose-chat pre {
-  background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-.prose-chat pre code {
-  background: none;
-  padding: 0;
-  font-size: 0.8em;
-  color: var(--color-text-secondary);
-}
-.prose-chat h1, .prose-chat h2, .prose-chat h3 {
-  color: var(--color-text-primary);
-  margin: 0.8em 0 0.3em;
-  font-weight: 600;
-}
-.prose-chat h1 { font-size: 1.15em; }
-.prose-chat h2 { font-size: 1.05em; }
-.prose-chat h3 { font-size: 0.95em; }
-.prose-chat blockquote {
-  border-left: 2px solid var(--color-accent);
-  margin: 0.5em 0;
-  padding-left: 0.75em;
-  color: var(--color-text-secondary);
-  font-style: italic;
-}
-.prose-chat hr {
-  border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 0.75em 0;
-}
-.prose-chat a {
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-color: rgba(129, 140, 248, 0.3);
-  transition: text-decoration-color 0.2s;
-}
-.prose-chat a:hover {
-  text-decoration-color: rgba(129, 140, 248, 0.8);
-}
-
-/* Compact prose for spec sections (tighter than prose-chat) */
 .prose-spec {
   line-height: 1.5;
   letter-spacing: 0.012em;
@@ -483,8 +384,7 @@ html.light .prose-spec pre {
   text-decoration-color: rgba(129, 140, 248, 0.8);
 }
 
-/* Tables (GFM) — shared across prose-chat and prose-spec */
-.prose-chat table,
+/* Tables (GFM) */
 .prose-spec table {
   width: 100%;
   border-collapse: collapse;
@@ -494,9 +394,7 @@ html.light .prose-spec pre {
   border-radius: 6px;
   overflow: hidden;
 }
-.prose-chat th,
 .prose-spec th,
-.prose-chat td,
 .prose-spec td {
   padding: 0.4em 0.7em;
   text-align: left;
@@ -504,24 +402,19 @@ html.light .prose-spec pre {
   border-right: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
-.prose-chat th:last-child,
 .prose-spec th:last-child,
-.prose-chat td:last-child,
 .prose-spec td:last-child {
   border-right: 0;
 }
-.prose-chat tr:last-child td,
 .prose-spec tr:last-child td {
   border-bottom: 0;
 }
-.prose-chat th,
 .prose-spec th {
   font-weight: 600;
   color: var(--color-text-primary);
   background: var(--color-surface-raised);
   border-bottom: 1px solid var(--color-border-strong);
 }
-.prose-chat td,
 .prose-spec td {
   color: var(--color-text-secondary);
 }
