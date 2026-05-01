@@ -37,8 +37,6 @@ const components: Components = {
 export interface MarkdownProps {
   /** @param children - Markdown source text to render. */
   children: string;
-  /** @param variant - Visual style: `chat` (informal, 1.65 line-height) or `spec` (dense, 1.5). Default `spec`. */
-  variant?: 'chat' | 'spec';
   /** @param className - Additional classes appended to the prose wrapper. */
   className?: string;
 }
@@ -48,9 +46,8 @@ export interface MarkdownProps {
  * @param props - Markdown configuration.
  * @returns A prose-styled div wrapping sanitized, GFM-enabled markdown.
  */
-export function Markdown({ children, variant = 'spec', className = '' }: MarkdownProps) {
-  const variantClass = variant === 'chat' ? 'prose-chat' : 'prose-spec';
-  const wrapperClass = className ? `${variantClass} ${className}` : variantClass;
+export function Markdown({ children, className = '' }: MarkdownProps) {
+  const wrapperClass = className ? `prose-spec ${className}` : 'prose-spec';
   return (
     <div className={wrapperClass}>
       <ReactMarkdown

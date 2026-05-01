@@ -164,7 +164,7 @@ export function PlanTab({
             </h4>
             <CopyButton text={planningContext} label="Copy" />
           </div>
-          <Markdown variant="spec" className="rounded-lg border border-border bg-surface-raised p-3 text-sm text-text-secondary leading-relaxed">{planningContext}</Markdown>
+          <Markdown className="rounded-lg border border-border bg-surface-raised p-3 text-sm text-text-secondary leading-relaxed">{planningContext}</Markdown>
         </section>
 
         {/* Step 2: Paste plan */}
@@ -213,7 +213,7 @@ export function PlanTab({
             <CopyButton text={plan} />
           </div>
         </div>
-        <Markdown variant="spec" className="rounded-lg border border-border bg-surface-raised p-3 text-sm text-text-secondary leading-relaxed">{plan}</Markdown>
+        <Markdown className="rounded-lg border border-border bg-surface-raised p-3 text-sm text-text-secondary leading-relaxed">{plan}</Markdown>
       </section>
 
       {/* Lifecycle phases */}
@@ -227,7 +227,7 @@ export function PlanTab({
             </h4>
             <UndoButton canUndo={canUndoPlan} onUndo={undoPlan} />
           </div>
-          <Markdown variant="spec" className="mt-1 rounded bg-surface-raised p-2 text-sm text-text-secondary">{execution}</Markdown>
+          <Markdown className="mt-1 rounded bg-surface-raised p-2 text-sm text-text-secondary">{execution}</Markdown>
         </section>
       ) : !started ? (
         /* Phase B: Planned — start implementation */

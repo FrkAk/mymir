@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import { TwoPanelLayout } from '@/components/layout/TwoPanelLayout';
 import { NavigatorPanel } from '@/components/workspace/NavigatorPanel';
 import { DetailPanel } from '@/components/workspace/DetailPanel';
-import { ProjectChat } from '@/components/workspace/ProjectChat';
 import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import type { Task, TaskEdge } from '@/lib/db/schema';
 import { asIdentifier, enrichWithTaskRef, type TaskWithRef } from '@/lib/graph/identifier';
@@ -211,7 +210,12 @@ export default function WorkspacePage() {
             onGraphChange={refreshGraph}
           />
         ) : (
-          <ProjectChat projectId={projectId} onGraphChange={refreshGraph} />
+          <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+            <p className="text-sm text-text-secondary">No task selected</p>
+            <p className="mt-1 max-w-sm text-xs text-text-muted">
+              Pick a task from the navigator to view and edit its details.
+            </p>
+          </div>
         )
       }
     />

@@ -47,7 +47,7 @@ export function ContextTab({
         <CopyButton text={contextText} />
       </div>
 
-      <Markdown variant="spec" className="rounded-lg border border-border bg-surface-raised p-4 text-sm text-text-secondary leading-relaxed">{contextText}</Markdown>
+      <Markdown className="rounded-lg border border-border bg-surface-raised p-4 text-sm text-text-secondary leading-relaxed">{contextText}</Markdown>
 
       <span className="block font-mono text-[10px] text-text-muted">
         ~{tokenEstimate.toLocaleString()} tokens

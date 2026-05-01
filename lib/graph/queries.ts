@@ -6,7 +6,6 @@ import {
   projects,
   tasks,
   taskEdges,
-  conversations,
 } from "@/lib/db/schema";
 import type { EdgeType } from "@/lib/types";
 import { asIdentifier, composeTaskRef, enrichWithTaskRef } from "./identifier";
@@ -295,42 +294,6 @@ export async function getProjectList() {
           : 0,
     };
   });
-}
-
-// ---------------------------------------------------------------------------
-// Conversations
-// ---------------------------------------------------------------------------
-
-/**
- * Fetch conversation messages for a project or specific task.
- * @param projectId - UUID of the project.
- * @param taskId - Optional UUID of the task (null for project-level chat).
- * @returns Conversation row, or undefined.
- */
-export async function getConversation(projectId: string, taskId?: string) {
-  if (taskId) {
-    const [conv] = await db
-      .select()
-      .from(conversations)
-      .where(
-        and(
-          eq(conversations.projectId, projectId),
-          eq(conversations.taskId, taskId),
-        ),
-      );
-    return conv;
-  }
-
-  const [conv] = await db
-    .select()
-    .from(conversations)
-    .where(
-      and(
-        eq(conversations.projectId, projectId),
-        sql`${conversations.taskId} IS NULL`,
-      ),
-    );
-  return conv;
 }
 
 // ---------------------------------------------------------------------------
