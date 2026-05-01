@@ -13,7 +13,6 @@ import type {
   ProjectStatus,
   TaskStatus,
   EdgeType,
-  Message,
   Decision,
   HistoryEntry,
   AcceptanceCriterion,
@@ -105,28 +104,3 @@ export const taskEdges = pgTable(
 
 export type TaskEdge = typeof taskEdges.$inferSelect;
 export type NewTaskEdge = typeof taskEdges.$inferInsert;
-
-// ---------------------------------------------------------------------------
-// Conversations
-// ---------------------------------------------------------------------------
-
-export const conversations = pgTable(
-  "conversations",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    projectId: uuid("project_id")
-      .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
-    taskId: uuid("task_id").references(() => tasks.id, { onDelete: "cascade" }),
-    messages: jsonb("messages").$type<Message[]>().notNull().default([]),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [
-    index("conversations_project_id_idx").on(t.projectId),
-    index("conversations_task_id_idx").on(t.taskId),
-  ],
-);
-
-export type Conversation = typeof conversations.$inferSelect;
-export type NewConversation = typeof conversations.$inferInsert;

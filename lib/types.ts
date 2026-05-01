@@ -11,23 +11,6 @@ export type ProjectStatus =
 /** Task lifecycle status. */
 export type TaskStatus = "draft" | "planned" | "in_progress" | "done" | "cancelled";
 
-/** A single tool invocation within a chat message. */
-export type ToolCall = {
-  id: string;
-  name: string;
-  args: Record<string, unknown>;
-  result?: string;
-};
-
-/** A chat message in a conversation. */
-export type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  toolCalls?: ToolCall[];
-  createdAt: string;
-};
-
 /** A recorded decision made during any project phase. */
 export type Decision = {
   id: string;
