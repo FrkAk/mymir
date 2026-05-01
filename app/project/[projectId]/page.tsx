@@ -210,9 +210,10 @@ export default function WorkspacePage() {
             onGraphChange={refreshGraph}
           />
         ) : (
-          <div className="flex h-full items-center justify-center px-8 text-center">
-            <p className="max-w-sm text-sm text-text-muted">
-              Select a task from the navigator to view and edit its details.
+          <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+            <p className="text-sm text-text-secondary">No task selected</p>
+            <p className="mt-1 max-w-sm text-xs text-text-muted">
+              Pick a task from the navigator to view and edit its details.
             </p>
           </div>
         )
