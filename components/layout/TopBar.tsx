@@ -22,7 +22,7 @@ interface TopBarProps {
 }
 
 /**
- * Fixed top navigation bar with logo, breadcrumb, theme toggle, and settings link.
+ * Fixed top navigation bar with logo, breadcrumb, theme toggle, and sign-out button.
  * @param props - TopBar configuration.
  * @returns A fixed-position navigation bar element.
  */
@@ -73,7 +73,7 @@ export function TopBar({ projectName, stageLabel, taskStats, projectId, projectS
           </div>
         )}
 
-        {/* Right: Theme toggle + Settings */}
+        {/* Right: Theme toggle + Sign out */}
         <div className="flex items-center gap-1 sm:gap-3">
           <button
             onClick={toggleTheme}

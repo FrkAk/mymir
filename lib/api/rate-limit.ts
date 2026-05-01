@@ -19,7 +19,7 @@ export type RateLimitRule = {
   pattern: string;
   max: number;
   window: number;
-  keyStrategy: "ip" | "session" | "apikey";
+  keyStrategy: "session" | "apikey";
 };
 
 /**
@@ -65,7 +65,7 @@ export function matchRule(pathname: string): RateLimitRule | null {
  * Extract the rate limit key from a request based on the rule's key strategy.
  * API keys are SHA-256 hashed to avoid storing secrets in the rate limit map.
  * @param request - Incoming request.
- * @param strategy - Key extraction strategy (ip, session, or apikey).
+ * @param strategy - Key extraction strategy (session or apikey).
  * @returns The extracted key string, or null if extraction fails.
  */
 export async function extractKey(
@@ -73,8 +73,6 @@ export async function extractKey(
   strategy: RateLimitRule["keyStrategy"],
 ): Promise<string | null> {
   switch (strategy) {
-    case "ip":
-      return getClientIp(request);
     case "session": {
       const cookie = getSessionCookie(request);
       return cookie ?? getClientIp(request);
