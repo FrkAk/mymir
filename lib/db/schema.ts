@@ -115,3 +115,9 @@ export const taskEdges = pgTable(
 
 export type TaskEdge = typeof taskEdges.$inferSelect;
 export type NewTaskEdge = typeof taskEdges.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Team Invite Codes (separate file, re-exported here for drizzle-kit)
+// ---------------------------------------------------------------------------
+
+export * from "./team-schema";

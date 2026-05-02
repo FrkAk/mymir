@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
  * Otherwise renders a form to create a team or accept an invitation by id.
  * If the bounce fails, render an inline error rather than redirecting to
  * `/`, which would loop back through `requireMembership`.
+ *
  * @returns Server-rendered onboarding UI.
  */
 export default async function OnboardingTeamPage() {
@@ -59,7 +60,7 @@ export default async function OnboardingTeamPage() {
           </h1>
           <p className="text-sm text-text-muted">
             Mymir is team-scoped. Create a team to start a fresh workspace, or
-            paste an invitation id from someone who shared theirs with you.
+            paste the 21-character invite code your team admin shared.
           </p>
         </div>
         <OnboardingForm />

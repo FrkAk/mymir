@@ -3,7 +3,14 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/shared/Button";
 import { TabSwitcher } from "@/components/shared/TabSwitcher";
-import { acceptInvitation, createTeam } from "./actions";
+import {
+  INVITE_CODE_ALPHABET_PATTERN_SOURCE,
+  INVITE_CODE_LENGTH,
+} from "@/lib/auth/invite-code-shape";
+import { acceptInviteCode, createTeam } from "./actions";
+
+const INVITE_CODE_HTML_PATTERN = `${INVITE_CODE_ALPHABET_PATTERN_SOURCE}{${INVITE_CODE_LENGTH}}`;
+const INVITE_CODE_PLACEHOLDER = "8K3jH-pX9_aW2nQ7vB4mF";
 
 const INPUT_CLASS =
   "w-full rounded-lg border border-border-strong bg-base px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent";
@@ -14,15 +21,16 @@ const HELP_CLASS = "mt-1 block text-xs text-text-muted";
 
 const TABS = [
   { id: "create", label: "Create team" },
-  { id: "join", label: "Accept invitation" },
+  { id: "join", label: "Join with code" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
 /**
- * Onboarding form — lets the signed-in user create a new team or accept an
- * invitation by id. Both branches dispatch to server actions in `./actions.ts`,
- * which call Better Auth's organization API and `setActiveOrganization`.
+ * Onboarding form — lets the signed-in user create a new team or join an
+ * existing one with a 21-char invite code. Both branches dispatch to
+ * server actions in `./actions.ts` which delegate to `lib/actions/team.ts`
+ * and `lib/actions/team-invite-code.ts`.
  * @returns Card-shaped form panel with create/join tabs.
  */
 export function OnboardingForm() {
@@ -98,24 +106,29 @@ export function OnboardingForm() {
       ) : (
         <form
           action={(formData) => {
-            const invitationId = String(formData.get("invitationId") ?? "");
+            const code = String(formData.get("code") ?? "");
             startTransition(async () => {
-              const result = await acceptInvitation({ invitationId });
+              const result = await acceptInviteCode({ code });
               if (!result.ok) setError(result.message);
             });
           }}
           className="space-y-4"
         >
           <label className="block">
-            <span className={LABEL_CLASS}>Invitation id</span>
+            <span className={LABEL_CLASS}>Invite code</span>
             <input
-              name="invitationId"
+              name="code"
               required
-              placeholder="00000000-0000-0000-0000-000000000000"
-              className={`${INPUT_CLASS} font-mono`}
+              minLength={INVITE_CODE_LENGTH}
+              maxLength={INVITE_CODE_LENGTH}
+              pattern={INVITE_CODE_HTML_PATTERN}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder={INVITE_CODE_PLACEHOLDER}
+              className={`${INPUT_CLASS} font-mono tracking-wider`}
             />
             <span className={HELP_CLASS}>
-              Ask the team owner for the invitation id (UUID).
+              Paste the 21-character invite code your team admin shared.
             </span>
           </label>
           <Button
@@ -124,7 +137,7 @@ export function OnboardingForm() {
             isLoading={pending}
             className="w-full"
           >
-            Accept invitation
+            Join team
           </Button>
         </form>
       )}
