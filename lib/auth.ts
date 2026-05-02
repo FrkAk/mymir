@@ -7,6 +7,7 @@ import postgres from "postgres";
 import { asc, eq } from "drizzle-orm";
 import * as authSchema from "@/lib/db/auth-schema";
 import { member } from "@/lib/db/auth-schema";
+import { clearOrgMembershipArtifacts } from "@/lib/auth/membership-cleanup";
 
 /**
  * Auth DB connection. Uses the same DATABASE_URL as the app.
@@ -80,7 +81,22 @@ export const auth = betterAuth({
   // checks into the data layer.
   plugins: [
     jwt(),
-    organization(),
+    organization({
+      organizationHooks: {
+        afterRemoveMember: async ({ member: removed, organization: org }) => {
+          await clearOrgMembershipArtifacts(removed.userId, org.id);
+        },
+        beforeDeleteOrganization: async ({ organization: org }) => {
+          const rows = await authDb
+            .select({ userId: member.userId })
+            .from(member)
+            .where(eq(member.organizationId, org.id));
+          await Promise.all(
+            rows.map((r) => clearOrgMembershipArtifacts(r.userId, org.id)),
+          );
+        },
+      },
+    }),
     oauthProvider({
       loginPage: "/sign-in",
       consentPage: "/consent",

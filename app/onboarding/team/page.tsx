@@ -15,10 +15,22 @@ export const dynamic = "force-dynamic";
  * Otherwise renders a form to create a team or accept an invitation by id.
  * If the bounce fails, render an inline error rather than redirecting to
  * `/`, which would loop back through `requireMembership`.
+ *
+ * `?join=1` bypasses the bounce so an already-onboarded user can reach
+ * the form to join a second team. TODO(MYMR-68 → MYMR-70): remove this
+ * dev escape hatch once the team-settings UI surfaces a "Join another
+ * team" entry point.
+ *
  * @returns Server-rendered onboarding UI.
  */
-export default async function OnboardingTeamPage() {
+export default async function OnboardingTeamPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ join?: string }>;
+}) {
   const session = await requireSession();
+  const { join } = await searchParams;
+  const allowReentry = join === "1";
 
   const [earliest] = await db
     .select({ organizationId: member.organizationId })
@@ -27,7 +39,7 @@ export default async function OnboardingTeamPage() {
     .orderBy(asc(member.createdAt))
     .limit(1);
 
-  if (earliest) {
+  if (earliest && !allowReentry) {
     if (session.session.activeOrganizationId === earliest.organizationId) {
       redirect("/");
     }
@@ -59,7 +71,7 @@ export default async function OnboardingTeamPage() {
           </h1>
           <p className="text-sm text-text-muted">
             Mymir is team-scoped. Create a team to start a fresh workspace, or
-            paste an invitation id from someone who shared theirs with you.
+            paste the 21-character invite code your team admin shared.
           </p>
         </div>
         <OnboardingForm />
