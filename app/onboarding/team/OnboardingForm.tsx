@@ -3,7 +3,14 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/shared/Button";
 import { TabSwitcher } from "@/components/shared/TabSwitcher";
+import {
+  INVITE_CODE_ALPHABET_PATTERN_SOURCE,
+  INVITE_CODE_LENGTH,
+} from "@/lib/auth/invite-code-shape";
 import { acceptInviteCode, createTeam } from "./actions";
+
+const INVITE_CODE_HTML_PATTERN = `${INVITE_CODE_ALPHABET_PATTERN_SOURCE}{${INVITE_CODE_LENGTH}}`;
+const INVITE_CODE_PLACEHOLDER = "8K3jH-pX9_aW2nQ7vB4mF";
 
 const INPUT_CLASS =
   "w-full rounded-lg border border-border-strong bg-base px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent";
@@ -112,12 +119,12 @@ export function OnboardingForm() {
             <input
               name="code"
               required
-              minLength={21}
-              maxLength={21}
-              pattern="[A-Za-z0-9_\-]{21}"
+              minLength={INVITE_CODE_LENGTH}
+              maxLength={INVITE_CODE_LENGTH}
+              pattern={INVITE_CODE_HTML_PATTERN}
               autoComplete="off"
               spellCheck={false}
-              placeholder="xxxxxxxxxxxxxxxxxxxxx"
+              placeholder={INVITE_CODE_PLACEHOLDER}
               className={`${INPUT_CLASS} font-mono tracking-wider`}
             />
             <span className={HELP_CLASS}>

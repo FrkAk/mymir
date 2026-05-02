@@ -10,7 +10,10 @@ import { requireSession } from "@/lib/auth/session";
 import { getAuthContext, NoActiveTeamError } from "@/lib/auth/context";
 import { isOrgAdmin } from "@/lib/auth/org-permissions";
 import { generateInviteCode, INVITE_CODE_PATTERN } from "@/lib/auth/invite-code";
-import { mapBetterAuthError } from "@/lib/actions/team-errors";
+import {
+  mapBetterAuthError,
+  TEAM_ACTION_MESSAGES,
+} from "@/lib/actions/team-errors";
 import { checkActionRateLimit } from "@/lib/actions/rate-limit-action";
 
 /** Public-facing metadata for a team invite code. Hides internal fields. */
@@ -56,19 +59,8 @@ export type JoinByCodeResult =
 const GENERIC_INVALID_CODE_MSG =
   "That invite code isn't valid. Ask the team admin for a fresh one.";
 
-const ALREADY_MEMBER_MSG = "You're already a member of this team.";
-
-const MEMBERSHIP_LIMIT_MSG =
-  "This team has reached its member limit. Contact the owner.";
-
-const UNAUTHORIZED_MSG = "You must be signed in to perform this action.";
-const NO_ACTIVE_TEAM_MSG =
-  "Pick a team before continuing — visit /onboarding/team to create or join one.";
 const FORBIDDEN_MSG = "Only team admins can manage invite codes.";
 const NOT_FOUND_MSG = "No invite code exists for this team yet.";
-const UNKNOWN_MSG = "Something went wrong. Please try again.";
-const RATE_LIMITED_MSG =
-  "Too many attempts. Please wait a moment and try again.";
 
 /**
  * Rate-limit policy for `joinTeamByCodeAction`. Defense in depth on top
@@ -104,9 +96,17 @@ async function resolveAdminContext(): Promise<
     ctx = await getAuthContext();
   } catch (err) {
     if (err instanceof NoActiveTeamError) {
-      return { ok: false, code: "no_active_team", message: NO_ACTIVE_TEAM_MSG };
+      return {
+        ok: false,
+        code: "no_active_team",
+        message: TEAM_ACTION_MESSAGES.no_active_team,
+      };
     }
-    return { ok: false, code: "unauthorized", message: UNAUTHORIZED_MSG };
+    return {
+      ok: false,
+      code: "unauthorized",
+      message: TEAM_ACTION_MESSAGES.unauthorized,
+    };
   }
   if (!(await isOrgAdmin())) {
     return { ok: false, code: "forbidden", message: FORBIDDEN_MSG };
@@ -167,7 +167,11 @@ export async function getOrCreateTeamInviteCodeAction(): Promise<InviteCodeResul
       if (row) return { ok: true, data: toMetadata(row) };
     }
     console.error("getOrCreateTeamInviteCodeAction failed", err);
-    return { ok: false, code: "unknown", message: UNKNOWN_MSG };
+    return {
+      ok: false,
+      code: "unknown",
+      message: TEAM_ACTION_MESSAGES.unknown,
+    };
   }
 }
 
@@ -183,11 +187,10 @@ export async function regenerateTeamInviteCodeAction(): Promise<InviteCodeResult
   if (!authResult.ok) return authResult;
   const { activeOrgId, userId } = authResult.ctx;
 
-  const newCode = generateInviteCode();
   const [updated] = await db
     .update(teamInviteCodes)
     .set({
-      code: newCode,
+      code: generateInviteCode(),
       useCount: 0,
       revokedAt: null,
       updatedAt: sql`NOW()`,
@@ -201,17 +204,20 @@ export async function regenerateTeamInviteCodeAction(): Promise<InviteCodeResult
       .insert(teamInviteCodes)
       .values({
         organizationId: activeOrgId,
-        code: newCode,
+        code: generateInviteCode(),
         createdBy: userId,
       })
       .returning();
     return { ok: true, data: toMetadata(created) };
   } catch (err) {
+    // 23505 here is almost always the org_id UNIQUE — a concurrent
+    // first-rotate just landed a row. Retry as UPDATE with a freshly
+    // generated code so a (vanishingly rare) code collision can't loop.
     if ((err as { code?: string } | null)?.code === "23505") {
       const [retried] = await db
         .update(teamInviteCodes)
         .set({
-          code: newCode,
+          code: generateInviteCode(),
           useCount: 0,
           revokedAt: null,
           updatedAt: sql`NOW()`,
@@ -221,7 +227,11 @@ export async function regenerateTeamInviteCodeAction(): Promise<InviteCodeResult
       if (retried) return { ok: true, data: toMetadata(retried) };
     }
     console.error("regenerateTeamInviteCodeAction failed", err);
-    return { ok: false, code: "unknown", message: UNKNOWN_MSG };
+    return {
+      ok: false,
+      code: "unknown",
+      message: TEAM_ACTION_MESSAGES.unknown,
+    };
   }
 }
 
@@ -303,12 +313,23 @@ export async function joinTeamByCodeAction(input: {
     const session = await requireSession();
     userId = session.user.id;
   } catch {
-    return { ok: false, code: "unauthorized", message: UNAUTHORIZED_MSG };
+    return {
+      ok: false,
+      code: "unauthorized",
+      message: TEAM_ACTION_MESSAGES.unauthorized,
+    };
   }
 
+  // Rate-limit before schema parse on purpose: malformed input still
+  // costs a slot so brute-force enumeration can't dodge the limiter by
+  // sending shape-violating payloads.
   const limit = await checkActionRateLimit(JOIN_RATE_LIMIT, userId);
   if (!limit.ok) {
-    return { ok: false, code: "rate_limited", message: RATE_LIMITED_MSG };
+    return {
+      ok: false,
+      code: "rate_limited",
+      message: TEAM_ACTION_MESSAGES.rate_limited,
+    };
   }
 
   const parsed = joinSchema.safeParse(input);
@@ -348,8 +369,14 @@ export async function joinTeamByCodeAction(input: {
     });
 
   if (!reserved) {
-    const cause = await diagnoseInvalidCode(code);
-    console.warn("joinTeamByCode rejected", { cause });
+    // Fire-and-forget: keeping the diagnostic SELECT off the response
+    // path prevents its latency from leaking whether the code matched a
+    // row (timing side-channel on top of anti-enumeration).
+    void diagnoseInvalidCode(code).then(
+      (cause) => console.warn("joinTeamByCode rejected", { cause }),
+      (err) =>
+        console.warn("joinTeamByCode rejected (diagnose failed)", { err }),
+    );
     return {
       ok: false,
       code: "invalid_code",
@@ -379,20 +406,28 @@ export async function joinTeamByCodeAction(input: {
 
     const mapped = mapBetterAuthError(err);
     if (mapped === "already_member") {
-      return { ok: false, code: "already_member", message: ALREADY_MEMBER_MSG };
+      return {
+        ok: false,
+        code: "already_member",
+        message: TEAM_ACTION_MESSAGES.already_member,
+      };
     }
     if (mapped === "membership_limit_reached") {
       return {
         ok: false,
         code: "membership_limit_reached",
-        message: MEMBERSHIP_LIMIT_MSG,
+        message: TEAM_ACTION_MESSAGES.membership_limit_reached,
       };
     }
     console.error("joinTeamByCodeAction addMember failed", {
       err,
       orgId: reserved.orgId,
     });
-    return { ok: false, code: "unknown", message: UNKNOWN_MSG };
+    return {
+      ok: false,
+      code: "unknown",
+      message: TEAM_ACTION_MESSAGES.unknown,
+    };
   }
 
   try {

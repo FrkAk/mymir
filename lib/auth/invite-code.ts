@@ -1,5 +1,17 @@
 import { randomBytes } from "node:crypto";
 
+import {
+  INVITE_CODE_ALPHABET_PATTERN_SOURCE,
+  INVITE_CODE_LENGTH,
+  INVITE_CODE_PATTERN,
+} from "./invite-code-shape";
+
+export {
+  INVITE_CODE_ALPHABET_PATTERN_SOURCE,
+  INVITE_CODE_LENGTH,
+  INVITE_CODE_PATTERN,
+};
+
 /**
  * 64-char URL-safe alphabet. Matches `nanoid`'s default. Mask `0x3F`
  * gives an unbiased uniform draw because 256 mod 64 === 0, so every
@@ -7,12 +19,6 @@ import { randomBytes } from "node:crypto";
  */
 const ALPHABET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
-/** Length in characters. 21 chars × log2(64) = 126 bits of entropy. */
-export const INVITE_CODE_LENGTH = 21;
-
-/** Anchored shape check for join-by-code input. */
-export const INVITE_CODE_PATTERN = /^[A-Za-z0-9_-]{21}$/;
 
 /**
  * Generate a 21-char URL-safe invite code (~126 bits entropy).

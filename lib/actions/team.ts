@@ -76,7 +76,7 @@ const createTeamSchema = z.object({
  */
 const acceptInvitationResponseSchema = z.object({
   invitation: z.object({
-    organizationId: z.string().min(1),
+    organizationId: z.uuid(),
   }),
 });
 
@@ -266,9 +266,6 @@ export async function updateMemberRoleAction(input: {
 export async function leaveTeamAction(input: {
   organizationId: string;
 }): Promise<TeamActionResult> {
-  const parsed = parseOrFail(leaveTeamSchema, input);
-  if (!parsed.ok) return parsed;
-
   let userId: string;
   try {
     const session = await requireSession();
@@ -276,6 +273,9 @@ export async function leaveTeamAction(input: {
   } catch {
     return teamFail("unauthorized");
   }
+
+  const parsed = parseOrFail(leaveTeamSchema, input);
+  if (!parsed.ok) return parsed;
 
   try {
     const reqHeaders = await headers();
