@@ -16,6 +16,45 @@ const TEAM_NAME_MAX = 64;
 const SLUG_MAX = 32;
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
+/**
+ * Slugs that resemble route segments or admin-shaped paths. We don't
+ * route teams under `/<slug>/...` today, but reserving these now keeps
+ * the URL namespace open for future product surfaces (settings panels,
+ * admin tools, public landing pages) without a migration later.
+ */
+const RESERVED_SLUGS: ReadonlySet<string> = new Set([
+  "_next",
+  "admin",
+  "api",
+  "app",
+  "assets",
+  "auth",
+  "consent",
+  "dev",
+  "favicon",
+  "help",
+  "invite",
+  "join",
+  "login",
+  "logout",
+  "mcp",
+  "onboarding",
+  "public",
+  "robots",
+  "settings",
+  "sign-in",
+  "sign-up",
+  "signin",
+  "signup",
+  "sitemap",
+  "static",
+  "support",
+  "team",
+  "teams",
+  "user",
+  "users",
+]);
+
 const createTeamSchema = z.object({
   name: z.string().trim().min(1, "Team name is required").max(TEAM_NAME_MAX),
   slug: z
@@ -23,7 +62,22 @@ const createTeamSchema = z.object({
     .trim()
     .min(2)
     .max(SLUG_MAX)
-    .regex(SLUG_PATTERN, "Slug must be lowercase alphanumeric with hyphens"),
+    .regex(SLUG_PATTERN, "Slug must be lowercase alphanumeric with hyphens")
+    .refine((s) => !RESERVED_SLUGS.has(s), {
+      message: "That URL slug is reserved. Try a different one.",
+    }),
+});
+
+/**
+ * Lenient runtime guard for `auth.api.acceptInvitation`'s response. BA
+ * doesn't export a stable result type for this endpoint, so we parse
+ * the only field we actually consume. Mismatches surface as `unknown`
+ * rather than throwing through the call site.
+ */
+const acceptInvitationResponseSchema = z.object({
+  invitation: z.object({
+    organizationId: z.string().min(1),
+  }),
 });
 
 const memberRoleSchema = z.enum(["member", "admin", "owner"]);
@@ -105,6 +159,11 @@ export async function inviteMemberAction(input: {
   email: string;
   role?: "member" | "admin" | "owner";
 }): Promise<TeamActionResult> {
+  try {
+    await requireSession();
+  } catch {
+    return teamFail("unauthorized");
+  }
   const parsed = parseOrFail(inviteMemberSchema, input);
   if (!parsed.ok) return parsed;
 
@@ -138,6 +197,11 @@ export async function inviteMemberAction(input: {
 export async function removeMemberAction(input: {
   memberIdOrEmail: string;
 }): Promise<TeamActionResult> {
+  try {
+    await requireSession();
+  } catch {
+    return teamFail("unauthorized");
+  }
   const parsed = parseOrFail(removeMemberSchema, input);
   if (!parsed.ok) return parsed;
 
@@ -167,6 +231,11 @@ export async function updateMemberRoleAction(input: {
   memberId: string;
   role: "member" | "admin" | "owner";
 }): Promise<TeamActionResult> {
+  try {
+    await requireSession();
+  } catch {
+    return teamFail("unauthorized");
+  }
   const parsed = parseOrFail(updateMemberRoleSchema, input);
   if (!parsed.ok) return parsed;
 
@@ -222,7 +291,18 @@ export async function leaveTeamAction(input: {
     return teamFail(code);
   }
 
-  await clearOrgMembershipArtifacts(userId, parsed.data.organizationId);
+  // Cleanup is best-effort. The user is already out of the org;
+  // surfacing a 500 here would be confusing and offer no recovery
+  // path. Stale OAuth tokens linger until cron / next prune.
+  try {
+    await clearOrgMembershipArtifacts(userId, parsed.data.organizationId);
+  } catch (err) {
+    console.error("leaveTeamAction cleanup failed", {
+      err,
+      userId,
+      orgId: parsed.data.organizationId,
+    });
+  }
   return { ok: true };
 }
 
@@ -237,6 +317,11 @@ export async function leaveTeamAction(input: {
 export async function acceptEmailInvitationAction(input: {
   invitationId: string;
 }): Promise<TeamActionResult<{ organizationId: string }>> {
+  try {
+    await requireSession();
+  } catch {
+    return teamFail("unauthorized");
+  }
   const parsed = parseOrFail(acceptInvitationSchema, input);
   if (!parsed.ok) return parsed;
 
@@ -246,10 +331,15 @@ export async function acceptEmailInvitationAction(input: {
       body: { invitationId: parsed.data.invitationId },
       headers: reqHeaders,
     });
-    const organizationId = (
-      accepted as { invitation?: { organizationId?: string } } | null | undefined
-    )?.invitation?.organizationId;
-    if (!organizationId) return teamFail("unknown");
+    const shape = acceptInvitationResponseSchema.safeParse(accepted);
+    if (!shape.success) {
+      console.error("acceptEmailInvitationAction unexpected response shape", {
+        accepted,
+        issues: shape.error.issues,
+      });
+      return teamFail("unknown");
+    }
+    const { organizationId } = shape.data.invitation;
     await auth.api.setActiveOrganization({
       body: { organizationId },
       headers: reqHeaders,

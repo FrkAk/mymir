@@ -11,6 +11,7 @@ import { getAuthContext, NoActiveTeamError } from "@/lib/auth/context";
 import { isOrgAdmin } from "@/lib/auth/org-permissions";
 import { generateInviteCode, INVITE_CODE_PATTERN } from "@/lib/auth/invite-code";
 import { mapBetterAuthError } from "@/lib/actions/team-errors";
+import { checkActionRateLimit } from "@/lib/actions/rate-limit-action";
 
 /** Public-facing metadata for a team invite code. Hides internal fields. */
 export type InviteCodeMetadata = {
@@ -39,6 +40,7 @@ type JoinFailureCode =
   | "invalid_code"
   | "already_member"
   | "membership_limit_reached"
+  | "rate_limited"
   | "unknown";
 
 export type JoinByCodeResult =
@@ -65,6 +67,24 @@ const NO_ACTIVE_TEAM_MSG =
 const FORBIDDEN_MSG = "Only team admins can manage invite codes.";
 const NOT_FOUND_MSG = "No invite code exists for this team yet.";
 const UNKNOWN_MSG = "Something went wrong. Please try again.";
+const RATE_LIMITED_MSG =
+  "Too many attempts. Please wait a moment and try again.";
+
+/**
+ * Rate-limit policy for `joinTeamByCodeAction`. Defense in depth on top
+ * of the 126-bit code entropy: throttles brute-force enumeration, and
+ * caps the cost of an attacker who somehow learns a single code.
+ *
+ * Bucket sizing: a legitimate user redeems once; 5/min/user covers
+ * typo-then-retry. 20/min/IP covers small office NATs without rejecting
+ * unrelated callers behind the same egress.
+ */
+const JOIN_RATE_LIMIT = {
+  action: "joinTeamByCode",
+  windowSeconds: 60,
+  perUserMax: 5,
+  perIpMax: 20,
+} as const;
 
 const joinSchema = z.object({
   code: z.string().trim().regex(INVITE_CODE_PATTERN),
@@ -88,7 +108,7 @@ async function resolveAdminContext(): Promise<
     }
     return { ok: false, code: "unauthorized", message: UNAUTHORIZED_MSG };
   }
-  if (!(await isOrgAdmin(ctx))) {
+  if (!(await isOrgAdmin())) {
     return { ok: false, code: "forbidden", message: FORBIDDEN_MSG };
   }
   return { ok: true, ctx };
@@ -249,8 +269,15 @@ async function diagnoseInvalidCode(
  * and switch their active org. Atomic UPDATE-RETURNING reserves the slot
  * (use_count++) inline with the validity guards (revoked / expired /
  * max_uses), so two concurrent redemptions of a `maxUses=1` code can't
- * both succeed. On post-reservation failure (e.g. addMember rejects with
- * already_member), we run a compensating decrement.
+ * both succeed.
+ *
+ * Saga shape: only `addMember` rejection compensates — once membership
+ * exists the slot is permanently consumed, so a `setActiveOrganization`
+ * failure is logged and the redemption returns success (the next
+ * request lands the user on onboarding to pick the active team).
+ *
+ * Rate-limited per-user (5/min) AND per-IP (20/min) as defense in depth
+ * on top of the 126-bit code entropy.
  *
  * @param input - `{ code }` from the join form. Must match `INVITE_CODE_PATTERN`.
  * @returns Discriminated result; `data.organizationId` on success.
@@ -264,6 +291,11 @@ export async function joinTeamByCodeAction(input: {
     userId = session.user.id;
   } catch {
     return { ok: false, code: "unauthorized", message: UNAUTHORIZED_MSG };
+  }
+
+  const limit = await checkActionRateLimit(JOIN_RATE_LIMIT, userId);
+  if (!limit.ok) {
+    return { ok: false, code: "rate_limited", message: RATE_LIMITED_MSG };
   }
 
   const parsed = joinSchema.safeParse(input);
@@ -312,8 +344,9 @@ export async function joinTeamByCodeAction(input: {
     };
   }
 
+  const reqHeaders = await headers();
+
   try {
-    const reqHeaders = await headers();
     await auth.api.addMember({
       body: {
         userId,
@@ -322,11 +355,6 @@ export async function joinTeamByCodeAction(input: {
       },
       headers: reqHeaders,
     });
-    await auth.api.setActiveOrganization({
-      body: { organizationId: reserved.orgId },
-      headers: reqHeaders,
-    });
-    return { ok: true, data: { organizationId: reserved.orgId } };
   } catch (err) {
     await db
       .update(teamInviteCodes)
@@ -353,4 +381,18 @@ export async function joinTeamByCodeAction(input: {
     });
     return { ok: false, code: "unknown", message: UNKNOWN_MSG };
   }
+
+  try {
+    await auth.api.setActiveOrganization({
+      body: { organizationId: reserved.orgId },
+      headers: reqHeaders,
+    });
+  } catch (err) {
+    console.error(
+      "joinTeamByCodeAction setActiveOrganization failed (membership succeeded)",
+      { err, orgId: reserved.orgId, userId },
+    );
+  }
+
+  return { ok: true, data: { organizationId: reserved.orgId } };
 }

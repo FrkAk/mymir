@@ -20,6 +20,7 @@ export type TeamActionFailureCode =
   | "membership_limit_reached"
   | "cannot_leave_only_owner"
   | "slug_taken"
+  | "rate_limited"
   | "unknown";
 
 /** Discriminated result. `T = void` shrinks to `{ ok: true }` (no `data`). */
@@ -51,8 +52,43 @@ export const TEAM_ACTION_MESSAGES: Record<TeamActionFailureCode, string> = {
   cannot_leave_only_owner:
     "You're the only owner — promote another member first, then leave.",
   slug_taken: "That URL slug is already in use. Try a different one.",
+  rate_limited: "Too many attempts. Please wait a moment and try again.",
   unknown: "Something went wrong. Please try again.",
 };
+
+/**
+ * Authorization-rejection codes Better Auth's organization plugin emits.
+ * Pinned against `node_modules/better-auth/dist/plugins/organization/error-codes.d.mts`
+ * (BA 1.6.x). All collapse to a single `forbidden` failure for the user.
+ *
+ * If BA adds a new `YOU_ARE_NOT_ALLOWED_TO_*` code, `mapBetterAuthError`
+ * logs a warning and falls through to `forbidden` as a safe default —
+ * see the heuristic fallback there.
+ */
+const FORBIDDEN_CODES: ReadonlySet<string> = new Set([
+  "YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM",
+  "YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER",
+  "YOU_ARE_NOT_ALLOWED_TO_INVITE_USERS_TO_THIS_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_CANCEL_THIS_INVITATION",
+  "YOU_ARE_NOT_ALLOWED_TO_INVITE_USER_WITH_THIS_ROLE",
+  "YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER",
+  "YOU_ARE_NOT_ALLOWED_TO_CREATE_TEAMS_IN_THIS_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_DELETE_TEAMS_IN_THIS_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_TEAM",
+  "YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_TEAM",
+  "YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM_MEMBER",
+  "YOU_ARE_NOT_ALLOWED_TO_REMOVE_A_TEAM_MEMBER",
+  "YOU_ARE_NOT_ALLOWED_TO_ACCESS_THIS_ORGANIZATION",
+  "YOU_ARE_NOT_ALLOWED_TO_CREATE_A_ROLE",
+  "YOU_ARE_NOT_ALLOWED_TO_UPDATE_A_ROLE",
+  "YOU_ARE_NOT_ALLOWED_TO_DELETE_A_ROLE",
+  "YOU_ARE_NOT_ALLOWED_TO_READ_A_ROLE",
+  "YOU_ARE_NOT_ALLOWED_TO_LIST_A_ROLE",
+  "YOU_ARE_NOT_ALLOWED_TO_GET_A_ROLE",
+]);
 
 /** Build a failure result with the canonical message for `code`. */
 export function teamFail(code: TeamActionFailureCode): TeamActionFailure {
@@ -97,7 +133,14 @@ export function mapBetterAuthError(err: unknown): TeamActionFailureCode {
     case "ORGANIZATION_SLUG_ALREADY_TAKEN":
       return "slug_taken";
     default:
-      if (code.startsWith("YOU_ARE_NOT_ALLOWED_TO_")) return "forbidden";
+      if (FORBIDDEN_CODES.has(code)) return "forbidden";
+      if (code.startsWith("YOU_ARE_NOT_ALLOWED_TO_")) {
+        console.warn(
+          "mapBetterAuthError: unrecognized authz-rejection code — update FORBIDDEN_CODES allowlist",
+          { code },
+        );
+        return "forbidden";
+      }
       return "unknown";
   }
 }

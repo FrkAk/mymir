@@ -1,37 +1,30 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { member } from "@/lib/db/auth-schema";
-import type { AuthContext } from "@/lib/auth/context";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 /**
- * Roles allowed to mutate team-level state (rotate invite codes, remove
- * members, change roles). Better Auth stores roles as a comma-separated
- * string per member row, so we split and trim before checking.
- */
-const ADMIN_ROLES = new Set(["owner", "admin"]);
-
-/**
- * Check whether the caller holds an admin-equivalent role in their active
- * organization. Reads `neon_auth.member.role` for the (userId, activeOrgId)
- * pair. Treated as a single source of truth until MYMR-69 wires Better
- * Auth's `hasPermission` checks into the data layer.
+ * Check whether the caller can administer their active team. Delegates
+ * to Better Auth's `/organization/has-permission` API, which reads the
+ * caller's role from `neon_auth.member` and consults the active access-
+ * control policy. Returns `false` (never throws) so callers can collapse
+ * the result into a typed `forbidden` failure.
  *
- * @param ctx - Resolved auth context (verified user + active org).
- * @returns True when the caller's role intersects {`owner`, `admin`}.
+ * Probes `invitation:create` — both `owner` and `admin` hold this by
+ * default; plain `member` does not. Forward-compatible with custom roles
+ * configured via the organization plugin's `roles` option (MYMR-69).
+ *
+ * @returns True when the caller may rotate / revoke invite codes.
  */
-export async function isOrgAdmin(ctx: AuthContext): Promise<boolean> {
-  const [row] = await db
-    .select({ role: member.role })
-    .from(member)
-    .where(
-      and(
-        eq(member.userId, ctx.userId),
-        eq(member.organizationId, ctx.activeOrgId),
-      ),
-    )
-    .limit(1);
-  if (!row) return false;
-  return row.role.split(",").some((r) => ADMIN_ROLES.has(r.trim()));
+export async function isOrgAdmin(): Promise<boolean> {
+  try {
+    const reqHeaders = await headers();
+    const result = await auth.api.hasPermission({
+      headers: reqHeaders,
+      body: { permissions: { invitation: ["create"] } },
+    });
+    return result.success === true;
+  } catch {
+    return false;
+  }
 }
