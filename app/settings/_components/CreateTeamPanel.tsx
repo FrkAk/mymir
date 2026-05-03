@@ -23,7 +23,7 @@ function deriveSlug(name: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
   if (!base || RESERVED_SLUGS.has(base)) return `team-${Date.now().toString(36).slice(-4)}`;
-  return base.slice(0, SLUG_MAX);
+  return base.slice(0, SLUG_MAX).replace(/-+$/, '');
 }
 
 interface CreateTeamPanelProps {
