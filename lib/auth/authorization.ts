@@ -10,6 +10,10 @@ import {
 } from "@/lib/db/schema";
 import { member } from "@/lib/db/auth-schema";
 import type { AuthContext } from "@/lib/auth/context";
+import {
+  roleHasProjectPermission,
+  type ProjectAction,
+} from "@/lib/auth/permissions";
 
 /** Resource kind a {@link ForbiddenError} refers to. */
 export type ForbiddenResource = "project" | "task" | "edge";
@@ -48,30 +52,62 @@ export class ForbiddenError extends Error {
 }
 
 /**
+ * Thrown when the caller is a member of the resource's org but lacks the
+ * role required for the requested action (e.g. delete or rename a project).
+ *
+ * Extends {@link ForbiddenError} so legacy `instanceof ForbiddenError`
+ * checks still trigger; new call sites can branch on the subclass to
+ * distinguish "not your team" (anti-enumeration → 404) from "wrong role"
+ * (legitimate 403 with actionable copy).
+ */
+export class InsufficientRoleError extends ForbiddenError {
+  constructor(
+    public readonly requiredAction: ProjectAction,
+    resource?: ForbiddenResource,
+    resourceId?: string,
+  ) {
+    super("InsufficientRole", resource, resourceId);
+    this.name = "InsufficientRoleError";
+  }
+}
+
+/**
  * Verify the caller can access the project and return its full row. The
  * project must belong to the caller's active organization AND the caller
  * must hold a membership row in that organization. A single SQL JOIN
  * performs both checks atomically so the predicate cannot be split.
+ *
+ * When `required` is provided, the caller's role (read from the same JOIN)
+ * is also evaluated against the requested project actions; insufficient
+ * role surfaces as {@link InsufficientRoleError} so the caller can return
+ * a typed 403 distinct from the membership-failure 404.
  *
  * Returning the row lets callers reuse it without a second `SELECT` by
  * primary key — the post-assert refetch was a defense-in-depth gap.
  *
  * @param projectId - UUID of the project to authorize.
  * @param ctx - Resolved auth context (user id + active org id).
+ * @param required - Optional permission gate (e.g. `{ project: ["delete"] }`).
  * @returns The full project row.
  * @throws ForbiddenError if the project does not belong to the active org
  *   or the user is not a member of that org. The same error is thrown
  *   when the project does not exist, to avoid leaking org membership.
+ * @throws InsufficientRoleError when the caller is a member but their role
+ *   does not grant every action in `required.project`.
  */
 export async function assertProjectAccess(
   projectId: string,
   ctx: AuthContext,
+  required?: { project: readonly ProjectAction[] },
 ): Promise<Project> {
   if (!isUuid(projectId)) {
     throw new ForbiddenError("Forbidden", "project", projectId);
   }
   const [row] = await db
-    .select(getTableColumns(projects))
+    .select({
+      project: getTableColumns(projects),
+      memberRole: member.role,
+    })
     .from(projects)
     .innerJoin(
       member,
@@ -88,7 +124,17 @@ export async function assertProjectAccess(
     )
     .limit(1);
   if (!row) throw new ForbiddenError("Forbidden", "project", projectId);
-  return row;
+  if (
+    required &&
+    !roleHasProjectPermission(row.memberRole, required.project)
+  ) {
+    throw new InsufficientRoleError(
+      required.project[0],
+      "project",
+      projectId,
+    );
+  }
+  return row.project;
 }
 
 /**
