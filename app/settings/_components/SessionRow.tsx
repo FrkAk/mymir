@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import type { OAuthSessionView } from '@/lib/actions/oauth-session';
 import { revokeOAuthSessionAction } from '@/lib/actions/oauth-session';
+import { formatOAuthClientName } from '@/lib/ui/oauth-client-name';
 import { formatAbsolute, formatRelative } from '@/lib/ui/relative-time';
 import { InlineConfirm } from './InlineConfirm';
 
@@ -56,6 +57,7 @@ export function SessionRow({ session, onRevoked, onError }: SessionRowProps) {
 
   const lastActiveLabel = formatRelative(session.lastActiveAt);
   const authorizedLabel = formatRelative(session.authorizedAt);
+  const clientLabel = formatOAuthClientName(session.clientName);
   const tooltip = `Authorized ${formatAbsolute(session.authorizedAt)} · Last active ${formatAbsolute(session.lastActiveAt)}`;
 
   return (
@@ -73,7 +75,7 @@ export function SessionRow({ session, onRevoked, onError }: SessionRowProps) {
 
       <div className="min-w-0 flex-1" title={tooltip}>
         <p className="truncate text-sm font-semibold text-text-primary">
-          {session.clientName}
+          {clientLabel}
         </p>
         <p className="mt-0.5 truncate text-xs text-text-muted">
           Last active {lastActiveLabel} · Authorized {authorizedLabel}
