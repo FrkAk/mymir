@@ -156,7 +156,7 @@ export function ProjectCard({
       {deleteError && (
         <div
           role="alert"
-          className="mb-3 rounded-md bg-danger/10 px-2 py-1 font-mono text-[10px] text-danger"
+          className="mb-3 rounded-md border border-danger/20 bg-danger/10 px-2 py-1 font-mono text-[10px] text-danger"
         >
           {deleteError}
         </div>
