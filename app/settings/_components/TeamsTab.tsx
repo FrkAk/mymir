@@ -52,12 +52,16 @@ export function TeamsTab({ initialTeams, activeOrganizationId, userName }: Teams
   const [error, setError] = useState<string | null>(null);
   const [glowId, setGlowId] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    const result = await listUserTeamsAction();
-    if (result.ok) {
-      setTeams(sortTeams(result.data, activeId));
-    }
-  }, [activeId]);
+  const refresh = useCallback(
+    async (activeOverride?: string | null) => {
+      const result = await listUserTeamsAction();
+      if (result.ok) {
+        const pinned = activeOverride !== undefined ? activeOverride : activeId;
+        setTeams(sortTeams(result.data, pinned));
+      }
+    },
+    [activeId],
+  );
 
   const handleSwitch = useCallback(
     (organizationId: string) => {
@@ -86,7 +90,7 @@ export function TeamsTab({ initialTeams, activeOrganizationId, userName }: Teams
       setActiveId(organizationId);
       setGlowId(organizationId);
       window.setTimeout(() => setGlowId(null), 900);
-      await refresh();
+      await refresh(organizationId);
       router.refresh();
     },
     [refresh, router],

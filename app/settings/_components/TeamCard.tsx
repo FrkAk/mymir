@@ -124,7 +124,7 @@ export function TeamCard({
   const containerClasses = [
     'relative flex items-center gap-4 rounded-xl border p-5 transition-colors',
     isActive
-      ? 'border-accent/30 bg-accent/4 shadow-[var(--shadow-card)]'
+      ? 'border-accent/30 bg-accent/5 shadow-[var(--shadow-card)]'
       : 'border-border bg-surface shadow-[var(--shadow-card)] hover:border-border-strong hover:shadow-[var(--shadow-card-hover)]',
   ].join(' ');
 
@@ -164,13 +164,13 @@ export function TeamCard({
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate text-sm font-semibold text-text-primary">{team.name}</p>
           <span
-            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] ${role.bg} ${role.text}`}
+            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${role.bg} ${role.text}`}
           >
             {role.dot ? <span className={`h-1.5 w-1.5 rounded-full ${role.dot}`} /> : null}
             {role.label}
           </span>
           {isActive ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-accent/15 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-accent-light">
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-accent/15 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-accent-light">
               <span className="loading-dot h-1.5 w-1.5 rounded-full bg-accent" />
               Active
             </span>

@@ -3,24 +3,17 @@
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/shared/Button';
 import { createTeamAction } from '@/lib/actions/team';
-
-const NAME_MAX = 64;
+import { RESERVED_SLUGS, SLUG_MAX, TEAM_NAME_MAX } from '@/lib/team/slug-rules';
 
 const INPUT_CLASS =
   'w-full rounded-lg border border-border-strong bg-base px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-accent';
 
-const RESERVED_SLUGS = new Set([
-  '_next', 'admin', 'api', 'app', 'assets', 'auth', 'consent', 'dev',
-  'favicon', 'help', 'invite', 'join', 'login', 'logout', 'mcp', 'onboarding',
-  'public', 'robots', 'settings', 'sign-in', 'sign-up', 'signin', 'signup',
-  'sitemap', 'static', 'support', 'team', 'teams', 'user', 'users',
-]);
-
 /**
  * Derive a URL slug from a free-form team name. Lowercases, strips
  * accents, replaces non-alphanumerics with hyphens, collapses runs, and
- * trims hyphens off the ends. Falls back to `team` when the result is
- * empty or matches a reserved word; the server validates either way.
+ * trims hyphens off the ends. Falls back to `team-<rand>` when the
+ * result is empty or matches a reserved word; the server validates
+ * either way.
  */
 function deriveSlug(name: string): string {
   const base = name
@@ -30,7 +23,7 @@ function deriveSlug(name: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
   if (!base || RESERVED_SLUGS.has(base)) return `team-${Date.now().toString(36).slice(-4)}`;
-  return base.slice(0, 32);
+  return base.slice(0, SLUG_MAX);
 }
 
 interface CreateTeamPanelProps {
@@ -96,7 +89,7 @@ export function CreateTeamPanel({ onCancel, onCreated, userName }: CreateTeamPan
           autoFocus
           value={name}
           onChange={(event) => setName(event.target.value)}
-          maxLength={NAME_MAX}
+          maxLength={TEAM_NAME_MAX}
           placeholder={teamNamePlaceholder(userName)}
           className={INPUT_CLASS}
         />

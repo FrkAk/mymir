@@ -171,7 +171,13 @@ export async function revokeOAuthSessionAction(input: {
       await tx
         .update(oauthRefreshToken)
         .set({ revoked: new Date() })
-        .where(eq(oauthRefreshToken.id, parsed.data.sessionId));
+        .where(
+          and(
+            eq(oauthRefreshToken.id, parsed.data.sessionId),
+            eq(oauthRefreshToken.userId, userId),
+            isNull(oauthRefreshToken.revoked),
+          ),
+        );
       await tx
         .delete(oauthAccessToken)
         .where(eq(oauthAccessToken.refreshId, parsed.data.sessionId));
