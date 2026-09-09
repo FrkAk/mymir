@@ -1,8 +1,7 @@
-diff --git a/dist/authorize-Crqw4_bR.mjs b/dist/authorize-Crqw4_bR.mjs
-index fdd19eb6333102dd77130d5ed142ad73f853b243..a7f21956220af2eaca92b8925e0d4e13f0701f5c 100644
---- a/dist/authorize-Crqw4_bR.mjs
-+++ b/dist/authorize-Crqw4_bR.mjs
-@@ -1696,7 +1696,9 @@ function validateClientRedirectUri(redirectUri, applicationType) {
+diff --git a/dist/authorize-BmTe2VYG.mjs b/dist/authorize-BmTe2VYG.mjs
+--- a/dist/authorize-BmTe2VYG.mjs
++++ b/dist/authorize-BmTe2VYG.mjs
+@@ -1697,7 +1697,9 @@ function validateClientRedirectUri(redirectUri, applicationType) {
  	const rawHttpHostname = getRawHttpHostname(redirectUri);
  	const isAllowedNativeHttpLoopback = rawHttpHostname === "localhost" || rawHttpHostname === "127.0.0.1" || rawHttpHostname === "[::1]";
  	if (applicationType === "web") {
@@ -13,7 +12,7 @@ index fdd19eb6333102dd77130d5ed142ad73f853b243..a7f21956220af2eaca92b8925e0d4e13
  		return;
  	}
  	if (isHttps) {
-@@ -4398,7 +4400,6 @@ const oauthProvider = (options) => {
+@@ -4404,7 +4406,6 @@ const oauthProvider = (options) => {
  		onRequest: handleIssuerMetadataRequest,
  		init: async (ctx) => {
  			if (ctx.options.secondaryStorage && ctx.options.session?.storeSessionInDatabase !== true) throw new BetterAuthError("OAuth Provider requires `session.storeSessionInDatabase: true` when using secondaryStorage");
