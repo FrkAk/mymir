@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.15](https://github.com/FrkAk/piyaz/compare/v0.4.14...v0.4.15) (2026-09-09)
+
+
+### Bug Fixes
+
+* update dependencies and preserve auth security patches ([#292](https://github.com/FrkAk/piyaz/issues/292)) ([804559e](https://github.com/FrkAk/piyaz/commit/804559e73e17b9621234afa713a55f5a04cce460))
+
 ## [0.4.14](https://github.com/FrkAk/piyaz/compare/v0.4.13...v0.4.14) (2026-08-28)
 
 
