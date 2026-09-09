@@ -47,15 +47,8 @@ jobs:
         run: bun install
         if: github.actor == 'dependabot[bot]'
       - name: Audit dependencies
-        # GHSA-f88m-g3jw-g9cj: four libvips CVEs inherited by sharp < 0.35.0.
-        # next declares sharp ^0.34.5 (optional) and miniflare pins sharp
-        # 0.34.5 exactly, so the fix is only reachable by forcing a major
-        # override against both parents. Drop the ignore once either admits
-        # sharp >= 0.35.0. Tracked in PYZ-345. (fast-uri, ip-address, postcss,
-        # and undici are fixed via package.json overrides; brace-expansion is
-        # fixed per-major in bun.lock, patched lines now exist for every
-        # major. See the //overrides note in package.json.)
-        run: bun audit --audit-level=high --ignore=GHSA-f88m-g3jw-g9cj
+        # Security floors and their removal conditions live in package.json.
+        run: bun audit --audit-level=high
       - name: Validate PR title
         if: github.event_name == 'pull_request'
         env:

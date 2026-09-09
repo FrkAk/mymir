@@ -145,4 +145,21 @@ describe("OAuth Provider 1.7 protocol compatibility", () => {
     });
     expect(arbitraryCursor.response.status).toBe(400);
   });
+
+  test.each([
+    "http://attacker.example/oauth/callback",
+    "http://localhost.attacker.example/oauth/callback",
+    "http://localhost./oauth/callback",
+    "cursor://anysphere.cursor-mcp/other",
+    "cursor://anysphere.cursor-mcp/oauth/callback?redirect=attacker",
+    "cursor://anysphere.cursor-mcp/oauth/callback#fragment",
+    "cursor://user@anysphere.cursor-mcp/oauth/callback",
+  ])("DCR rejects unsafe web callback %s", async (redirectUri) => {
+    const { response } = await registerClient({
+      applicationType: "web",
+      redirectUri,
+      tokenEndpointAuthMethod: "none",
+    });
+    expect(response.status).toBe(400);
+  });
 });
